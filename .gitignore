@@ -19,3 +19,6 @@ auto-save-list/
 
 # Recent files list
 recentf
+
+# Tangled
+emacs.el
