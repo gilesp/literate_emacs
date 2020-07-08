@@ -6,6 +6,16 @@
 
 # Backup files
 *~
+backups/
 
 # Undo-tree save-files
 *.~undo-tree
+
+# 3rd party packages
+elpa/
+
+# Autosave
+auto-save-list/
+
+# Recent files list
+recentf
