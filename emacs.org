@@ -26,8 +26,12 @@
     - [[#enable-recent-f-mode-recent-files][Enable recent-f mode (recent-files)]]
     - [[#enable-overwriting-selected-text][Enable overwriting selected text]]
     - [[#disable-audible-bell-use-visual-instead][Disable audible bell, use visual instead]]
+    - [[#remove-toolbar][Remove toolbar]]
   - [[#org-mode][Org Mode]]
     - [[#toc-org][Toc-org]]
+  - [[#markdown][Markdown]]
+  - [[#git-stuff][Git stuff]]
+  - [[#todo][Todo]]
 
 ** About this file
 This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]].
@@ -150,6 +154,10 @@ unless told otherwise, this speeds up initialisation.
   (setq visible-bell t)
 #+END_SRC
 
+*** Remove toolbar
+#+BEGIN_SRC emacs-lisp
+  (tool-bar-mode -1)
+#+END_SRC
 
 
 ** Org Mode
@@ -170,3 +178,43 @@ automatic generation of up to date tables of contents.
     :hook (org-mode . toc-org-enable))
 
 #+END_SRC
+
+
+** Markdown
+Sometimes I need to edit markdown, so here's how to configure [[https://github.com/jrblevin/markdown-mode][markdown-mode]].
+For README.md files, use github flavoured markdown, otherwise use normal markdown mode.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package markdown-mode
+    :mode (("README\\.md\\'" . gfm-mode)
+	   ("\\.md\\'" . markdown-mode)
+	   ("\\.markdown\\'" . markdown-mode)))
+#+END_SRC
+
+** Git stuff
+Magit is a great interface to git (although the [[https://magit.vc/manual/magit/][documentation]] is quite dense).
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :bind (("C-x g" . magit-status)
+	   ("C-x M-g" . magit-dispatch-popup)))
+#+END_SRC
+Apart from the keybindings, I don't need to make any config changes.
+
+I like to have a visual git status in the gutter/fringe, for that I use [[https://github.com/emacsorphanage/git-gutter][git-gutter.el]]
+#+BEGIN_SRC emacs-lisp
+  (use-package git-gutter
+    :diminish git-gutter-mode
+    :init
+    (custom-set-variables
+     '(git-gutter:update-interval 2))
+    :config
+    (global-git-gutter-mode +1))
+#+END_SRC
+Dimish the mode so that it doesn't clutter up our mode line/status bar.
+
+The update-intervalk config is to enable live updating (every 2 seconds of idle time).
+
+I enable it globally because I use git for many different files, not just code.
+
+** Todo
+- Completion engine: Helm? IDO? Ivy?
