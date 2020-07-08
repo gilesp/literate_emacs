@@ -1,0 +1,172 @@
+#+TITLE: Emacs Literate Configuration
+#+AUTHOR: Giles Paterson
+#+PROPERTY: header-args :tangle yes
+
+* Configuration
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+** Table of Contents :TOC_3_gh:
+- [[#configuration][Configuration]]
+  - [[#about-this-file][About this file]]
+    - [[#automatically-tangle][Automatically Tangle]]
+    - [[#visibility-settings][Visibility Settings]]
+    - [[#table-of-contents][Table of Contents]]
+  - [[#personal-information][Personal Information]]
+  - [[#package-management][Package Management]]
+    - [[#sources][Sources]]
+    - [[#use-package][Use-Package]]
+  - [[#editor-configuration][Editor Configuration]]
+    - [[#keep-changes-from-customize-in-a-separate-file][Keep changes from 'customize' in a separate file]]
+    - [[#save-all-backups-in-one-place][Save all backups in one place]]
+    - [[#get-rid-of-the-startup-screen][Get rid of the startup screen]]
+    - [[#unbind-the-pesky-sleep-key][Unbind the pesky sleep key]]
+    - [[#use-y-or-n-instead-of-yes-or-no][Use 'y' or 'n' instead of 'yes' or 'no']]
+    - [[#enable-recent-f-mode-recent-files][Enable recent-f mode (recent-files)]]
+    - [[#enable-overwriting-selected-text][Enable overwriting selected text]]
+    - [[#disable-audible-bell-use-visual-instead][Disable audible bell, use visual instead]]
+  - [[#org-mode][Org Mode]]
+    - [[#toc-org][Toc-org]]
+
+** About this file
+This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]].
+
+This is a literate configuration, meaning that it's an org file with
+embedded code blocks that form the configuration for emacs. Having the
+code blocks in an org file allows me to document everything with the
+code it relates to.
+
+*** Automatically Tangle
+First there is a property defined on the file:
+
+#+BEGIN_SRC :tangle no
+header-args :tangle yes
+#+END_SRC
+
+This tells emacs to automatically tangle (include) all code blocks in this file when
+generating the code for the config, unless the code block explicitly includes
+=:tangle no= as the above code block does.
+
+
+*** Visibility Settings
+Next we have a property defined on the [[Configuration][Configuration]] heading that defines the visibility
+that tells org to show it's direct children on startup. This way a clean outline of all
+sub headings under Configuration is shown each time this file is opened in org-mode.
+
+
+
+*** Table of Contents
+Finally, there is a [[Table of Contents][Table of Contents]] heading that includes the tag: =:TOC_3_gh:=. This
+tells an org-mode package =toc-org= to generate a table of contents under this heading
+that has a max depth of 3 and is created using Github-style hrefs. This table of contents
+is updated everytime the file is saved and makes for a functional table of contents that
+works properly directly on github.
+
+** Personal Information
+This is me
+
+#+BEGIN_SRC emacs-lisp
+(setq user-full-name "Giles Paterson"
+      user-mail-address "giles@vurt.uk")
+#+END_SRC
+
+** Package Management
+*** Sources
+
+Before doing anything else, I need to configure [[melpa.org][melpa] as
+a source for packages.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'package)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+  (package-initialize)
+#+END_SRC
+
+*** Use-Package
+
+I like to use [[https://github.com/jwiegley/use-package][use-package]] to keep things tidy and speedy on startup,
+so this makes sure it's available. I set it to defer loading packages
+unless told otherwise, this speeds up initialisation.
+
+#+BEGIN_SRC emacs-lisp
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+  (setq use-package-always-ensure t
+	use-package-ensure-all t
+	use-package-always-defer t)
+  (require 'use-package)
+  (require 'use-package-ensure)
+#+END_SRC
+
+** Editor Configuration
+*** Keep changes from 'customize' in a separate file
+
+#+BEGIN_SRC emacs-lisp
+  (setq custom-file (expand-file-name "customize.el" user-emacs-directory))
+  (load custom-file)
+#+END_SRC
+
+*** Save all backups in one place
+
+#+BEGIN_SRC emacs-lisp
+  (setq backup-directory-alist
+    `(("." . ,(concat user-emacs-directory "backups"))))
+#+END_SRC
+
+*** Get rid of the startup screen
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-startup-screen t)
+#+END_SRC
+
+*** Unbind the pesky sleep key 
+#+BEGIN_SRC emacs-lisp
+  (global-unset-key [(control z)])
+  (global-unset-key [(control x)(control z)])
+#+END_SRC
+
+*** Use 'y' or 'n' instead of 'yes' or 'no'
+#+BEGIN_SRC emacs-lisp
+  (fset 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+
+*** Enable recent-f mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
+#+BEGIN_SRC emacs-lisp
+  (recentf-mode 1)
+  (setq recentf-max-menu-items 50)
+  (setq recentf-max-saved-items 250)
+  (global-set-key "\C-x\ \C-r" 'recentf-open-files)
+#+END_SRC
+
+*** Enable overwriting selected text
+#+BEGIN_SRC emacs-lisp
+  (delete-selection-mode t)
+#+END_SRC
+
+*** Disable audible bell, use visual instead
+#+BEGIN_SRC emacs-lisp
+  (setq ring-bell-function 'ignore)
+  (setq visible-bell t)
+#+END_SRC
+
+
+
+** Org Mode
+#+BEGIN_SRC emacs-lisp
+(use-package org
+  :init
+  (setq org-src-tab-acts-natively t))
+#+END_SRC
+
+*** Toc-org
+Install the =toc-org= package after org mode is loaded. This enables
+automatic generation of up to date tables of contents.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package toc-org
+    :ensure t
+    :after org
+    :hook (org-mode . toc-org-enable))
+
+#+END_SRC
