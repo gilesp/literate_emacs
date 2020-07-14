@@ -32,9 +32,11 @@
     - [[#toc-org][Toc-org]]
   - [[#markdown][Markdown]]
   - [[#git-stuff][Git stuff]]
-  - [[#completion][Completion]]
+  - [[#completion-framework][Completion Framework]]
   - [[#projectile][Projectile]]
     - [[#counsel-projectile-org-capture][counsel-projectile-org-capture]]
+  - [[#codetext-completion-company-mode][Code/Text Completion (company-mode)]]
+  - [[#development-languages][Development languages]]
   - [[#javascriptweb-development-lsp][Javascript/web development (lsp?)]]
   - [[#org-mode-live-preview][Org mode live preview?]]
 
@@ -231,7 +233,7 @@ The update-intervalk config is to enable live updating (every 2 seconds of idle 
 
 I enable it globally because I use git for many different files, not just code.
 
-** Completion
+** Completion Framework
 I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, instead of Helm.
 
 #+BEGIN_SRC emacs-lisp
@@ -243,7 +245,8 @@ I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, inst
     (setq ivy-use-virtual-buffers t)
     ;; number of result lines to display
     ;;(setq ivy-height 10)
-    (setq ivy-count-format "(%d/%d) "))
+    (setq ivy-count-format "(%d/%d) ")
+    (setq ivy-display-style 'fancy))
 #+END_SRC
 
 I'll start with a minimal config - just setting the options recommended int he getting started section of the documentation.
@@ -256,9 +259,10 @@ Similarly, for Counsel, I'll just enable counsel-mode to default to using counse
     (counsel-mode 1))
 #+END_SRC
 
-And finally, swiper for searching
+And finally, swiper for searching. I bind it to C-s so that I use it instead of i-search.
 #+BEGIN_SRC emacs-lisp
-(use-package swiper)
+  (use-package swiper
+    :bind ("C-s" . 'swiper))
 #+END_SRC
 
 ** Projectile
@@ -284,9 +288,73 @@ And since I'm currently using Ivy & Counsel, I'll include the [[https://github.c
     :config
     (counsel-projectile-mode))
 #+END_SRC
-
 *** TODO [[https://github.com/ericdanan/counsel-projectile#setting-counsel-projectile-org-capture-templates][counsel-projectile-org-capture]]
+** Code/Text Completion (company-mode)
+Got to have those sweet code-completion popups, courtesy of [[https://company-mode.github.io/][company-mode]].
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+    :init
+    (global-company-mode))
+#+END_SRC
 
-** TODO Javascript/web development (lsp?)
+** Development languages
+I'm going to try lsp-mode again, for languages it supports.
+Here's the core lsp-configuration:
+#+BEGIN_SRC emacs-lisp
+  (setq lsp-keymap-prefix "C-l")
+
+  (use-package lsp-mode
+    :hook (
+	   ;; bind lsp to the development modes I'm interested in.
+	   (web-mode . lsp-deferred)
+	   (lsp-mode . lsp-enable-which-key-integration))
+    :commands lsp lsp-deferred)
+
+  (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+  ;;(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+
+  (use-package which-key
+    :config
+    (which-key-mode))
+#+END_SRC
+I've changed the default prefix from "s-l" to "C-l".
+
+** Javascript/web development (lsp?)
+There are several ways to configure javascript & typescript
+support. I'm going with web-mode since it can handle template-based
+development (react, vue etc.) along with raw js & ts files.
+
+#+BEGIN_SRC emacs-lisp
+(use-package web-mode
+  :ensure t
+  :mode (("\\.js\\'" . web-mode)
+         ("\\.jsx\\'" . web-mode)
+         ("\\.ts\\'" . web-mode)
+         ("\\.tsx\\'" . web-mode)
+         ("\\.html\\'" . web-mode)
+         ("\\.vue\\'" . web-mode)
+	 ("\\.json\\'" . web-mode))
+  :commands web-mode
+  :hook ((web-mode-hook . company-mode))
+  :config
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-enable-part-face t)
+  (setq web-mode-content-types-alist
+	'(("jsx" . "\\.js[x]?\\'")))
+  )
+#+END_SRC
+
+You will need to install the [[https://github.com/sourcegraph/javascript-typescript-langserver][javascript-typescript-langserver]] for lsp
+to work with javascript.
+#+BEGIN_SRC sh
+npm i -g javascript-typescript-langserver
+#+END_SRC
+
+Alternatively, this could be installed as a docker container, and then
+you could avoid installing npm/node on your local machine. I'll have
+to give that another go sometime.
+
 ** TODO Org mode live preview?
 
