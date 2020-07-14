@@ -23,15 +23,20 @@
     - [[#get-rid-of-the-startup-screen][Get rid of the startup screen]]
     - [[#unbind-the-pesky-sleep-key][Unbind the pesky sleep key]]
     - [[#use-y-or-n-instead-of-yes-or-no][Use 'y' or 'n' instead of 'yes' or 'no']]
-    - [[#enable-recent-f-mode-recent-files][Enable recent-f mode (recent-files)]]
+    - [[#enable-recentf-mode-recent-files][Enable recentf mode (recent-files)]]
     - [[#enable-overwriting-selected-text][Enable overwriting selected text]]
     - [[#disable-audible-bell-use-visual-instead][Disable audible bell, use visual instead]]
     - [[#remove-toolbar][Remove toolbar]]
+    - [[#theme][Theme]]
   - [[#org-mode][Org Mode]]
     - [[#toc-org][Toc-org]]
   - [[#markdown][Markdown]]
   - [[#git-stuff][Git stuff]]
-  - [[#todo][Todo]]
+  - [[#completion][Completion]]
+  - [[#projectile][Projectile]]
+    - [[#counsel-projectile-org-capture][counsel-projectile-org-capture]]
+  - [[#javascriptweb-development-lsp][Javascript/web development (lsp?)]]
+  - [[#org-mode-live-preview][Org mode live preview?]]
 
 ** About this file
 This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]].
@@ -135,7 +140,7 @@ unless told otherwise, this speeds up initialisation.
   (fset 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
 
-*** Enable recent-f mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
+*** Enable recentf mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
 #+BEGIN_SRC emacs-lisp
   (recentf-mode 1)
   (setq recentf-max-menu-items 50)
@@ -159,6 +164,17 @@ unless told otherwise, this speeds up initialisation.
   (tool-bar-mode -1)
 #+END_SRC
 
+*** Theme
+I like a dark editor, and base16-brewer is what I've got used to
+#+BEGIN_SRC emacs-lisp
+    ;; (use-package base16-theme
+    ;;     :ensure t
+    ;;     :config
+    ;;     (load-theme 'base16-brewer t))
+(add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes"))
+(load-theme 'vscode-dark-plus t)
+;;(load-theme 'base16-vscode-dark t)
+#+END_SRC
 
 ** Org Mode
 #+BEGIN_SRC emacs-lisp
@@ -178,7 +194,6 @@ automatic generation of up to date tables of contents.
     :hook (org-mode . toc-org-enable))
 
 #+END_SRC
-
 
 ** Markdown
 Sometimes I need to edit markdown, so here's how to configure [[https://github.com/jrblevin/markdown-mode][markdown-mode]].
@@ -216,5 +231,62 @@ The update-intervalk config is to enable live updating (every 2 seconds of idle 
 
 I enable it globally because I use git for many different files, not just code.
 
-** Todo
-- Completion engine: Helm? IDO? Ivy?
+** Completion
+I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, instead of Helm.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy
+    :diminish ivy-mode
+    :config
+    (ivy-mode 1)
+    ;; add 'recent-mode' and bookmarks to 'ivy-switch-buffer'.
+    (setq ivy-use-virtual-buffers t)
+    ;; number of result lines to display
+    ;;(setq ivy-height 10)
+    (setq ivy-count-format "(%d/%d) "))
+#+END_SRC
+
+I'll start with a minimal config - just setting the options recommended int he getting started section of the documentation.
+
+Similarly, for Counsel, I'll just enable counsel-mode to default to using counsel.
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel
+    :diminish counsel-mode
+    :config
+    (counsel-mode 1))
+#+END_SRC
+
+And finally, swiper for searching
+#+BEGIN_SRC emacs-lisp
+(use-package swiper)
+#+END_SRC
+
+** Projectile
+[[https://github.com/bbatsov/projectile][Projectile]] is handy for interacting with projects, and it can integrate with Helm or Ivy nicely.
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :demand
+    :bind (:map projectile-mode-map
+	      ("C-c p" . projectile-command-map))
+    :init
+    (setq projectile-completion-system 'ivy)
+    (setq projectile-enable-caching t)
+    :config
+    (add-to-list 'projectile-globally-ignored-files "node-modules")
+    (projectile-mode))
+#+END_SRC
+
+And since I'm currently using Ivy & Counsel, I'll include the [[https://github.com/ericdanan/counsel-projectile][counsel-projectile]] integration too.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel-projectile
+    :demand
+    :config
+    (counsel-projectile-mode))
+#+END_SRC
+
+*** TODO [[https://github.com/ericdanan/counsel-projectile#setting-counsel-projectile-org-capture-templates][counsel-projectile-org-capture]]
+
+** TODO Javascript/web development (lsp?)
+** TODO Org mode live preview?
+
