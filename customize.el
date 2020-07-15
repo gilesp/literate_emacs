@@ -9,7 +9,7 @@
  '(git-gutter:update-interval 2)
  '(package-selected-packages
    (quote
-    (counsel-projectile projectile ivy-hydra counsel ivy git-gutter magit markdown-mode toc-org use-package))))
+    (web-mode which-key lsp-treemacs lsp-ivy lsp-mode company counsel-projectile projectile ivy-hydra counsel ivy git-gutter magit markdown-mode toc-org use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

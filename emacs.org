@@ -27,21 +27,29 @@
     - [[#enable-overwriting-selected-text][Enable overwriting selected text]]
     - [[#disable-audible-bell-use-visual-instead][Disable audible bell, use visual instead]]
     - [[#remove-toolbar][Remove toolbar]]
+    - [[#column-numbering-in-mode-line][Column numbering in mode line]]
+    - [[#show-trailing-white-space][Show trailing white space]]
+    - [[#diminish][Diminish]]
     - [[#theme][Theme]]
   - [[#org-mode][Org Mode]]
     - [[#toc-org][Toc-org]]
   - [[#markdown][Markdown]]
   - [[#git-stuff][Git stuff]]
   - [[#completion-framework][Completion Framework]]
+    - [[#ivy][Ivy]]
+    - [[#counsel][Counsel]]
+    - [[#swiper][Swiper]]
   - [[#projectile][Projectile]]
     - [[#counsel-projectile-org-capture][counsel-projectile-org-capture]]
   - [[#codetext-completion-company-mode][Code/Text Completion (company-mode)]]
   - [[#development-languages][Development languages]]
+  - [[#line-numbers][Line numbers]]
   - [[#javascriptweb-development-lsp][Javascript/web development (lsp?)]]
   - [[#org-mode-live-preview][Org mode live preview?]]
 
 ** About this file
-This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]].
+This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's
+config]].
 
 This is a literate configuration, meaning that it's an org file with
 embedded code blocks that form the configuration for emacs. Having the
@@ -55,24 +63,26 @@ First there is a property defined on the file:
 header-args :tangle yes
 #+END_SRC
 
-This tells emacs to automatically tangle (include) all code blocks in this file when
-generating the code for the config, unless the code block explicitly includes
-=:tangle no= as the above code block does.
+This tells emacs to automatically tangle (include) all code blocks in
+this file when generating the code for the config, unless the code
+block explicitly includes =:tangle no= as the above code block does.
 
 
 *** Visibility Settings
-Next we have a property defined on the [[Configuration][Configuration]] heading that defines the visibility
-that tells org to show it's direct children on startup. This way a clean outline of all
-sub headings under Configuration is shown each time this file is opened in org-mode.
+Next we have a property defined on the [[Configuration][Configuration]] heading that
+defines the visibility that tells org to show it's direct children on
+startup. This way a clean outline of all sub headings under
+Configuration is shown each time this file is opened in org-mode.
 
 
 
 *** Table of Contents
-Finally, there is a [[Table of Contents][Table of Contents]] heading that includes the tag: =:TOC_3_gh:=. This
-tells an org-mode package =toc-org= to generate a table of contents under this heading
-that has a max depth of 3 and is created using Github-style hrefs. This table of contents
-is updated everytime the file is saved and makes for a functional table of contents that
-works properly directly on github.
+Finally, there is a [[Table of Contents][Table of Contents]] heading that includes the tag:
+=:TOC_3_gh:=. This tells an org-mode package =toc-org= to generate a
+table of contents under this heading that has a max depth of 3 and is
+created using Github-style hrefs. This table of contents is updated
+everytime the file is saved and makes for a functional table of
+contents that works properly directly on github.
 
 ** Personal Information
 This is me
@@ -88,6 +98,7 @@ This is me
 Before doing anything else, I need to configure [[melpa.org][melpa] as
 a source for packages.
 
+**** Melpa config
 #+BEGIN_SRC emacs-lisp
   (require 'package)
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
@@ -166,6 +177,25 @@ unless told otherwise, this speeds up initialisation.
   (tool-bar-mode -1)
 #+END_SRC
 
+*** Column numbering in mode line
+#+BEGIN_SRC emacs-lisp
+(column-number-mode 1)
+#+END_SRC
+
+*** Show trailing white space 
+Show white space at the ends of line, to avoid embarassment when
+comitting something. Then delete them with M-x delete-trailing-whitespace
+#+BEGIN_SRC emacs-lisp
+(setq-default show-trailing-whitespace t)
+#+END_SRC
+
+*** Diminish
+Use diminish so that use-package can hid modes from the mode line when
+we ask it to.
+#+BEGIN_SRC emacs-lisp
+(use-package diminish)
+#+END_SRC
+
 *** Theme
 I like a dark editor, and base16-brewer is what I've got used to
 #+BEGIN_SRC emacs-lisp
@@ -234,6 +264,8 @@ The update-intervalk config is to enable live updating (every 2 seconds of idle 
 I enable it globally because I use git for many different files, not just code.
 
 ** Completion Framework
+
+*** Ivy
 I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, instead of Helm.
 
 #+BEGIN_SRC emacs-lisp
@@ -251,17 +283,21 @@ I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, inst
 
 I'll start with a minimal config - just setting the options recommended int he getting started section of the documentation.
 
+*** Counsel
 Similarly, for Counsel, I'll just enable counsel-mode to default to using counsel.
 #+BEGIN_SRC emacs-lisp
+  (use-package counsel-projectile)
   (use-package counsel
     :diminish counsel-mode
     :config
     (counsel-mode 1))
 #+END_SRC
 
+*** Swiper
 And finally, swiper for searching. I bind it to C-s so that I use it instead of i-search.
 #+BEGIN_SRC emacs-lisp
   (use-package swiper
+    :commands (swiper swiper-all)
     :bind ("C-s" . 'swiper))
 #+END_SRC
 
@@ -293,6 +329,7 @@ And since I'm currently using Ivy & Counsel, I'll include the [[https://github.c
 Got to have those sweet code-completion popups, courtesy of [[https://company-mode.github.io/][company-mode]].
 #+BEGIN_SRC emacs-lisp
   (use-package company
+    :diminish
     :init
     (global-company-mode))
 #+END_SRC
@@ -308,10 +345,14 @@ Here's the core lsp-configuration:
 	   ;; bind lsp to the development modes I'm interested in.
 	   (web-mode . lsp-deferred)
 	   (lsp-mode . lsp-enable-which-key-integration))
+    :init
+    (setq lsp-enable-completion-at-point t)
+    (setq lsp-enable-indentation t)
+    (setq lsp-enable-on-type-formatting t)
     :commands lsp lsp-deferred)
 
   (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-  ;;(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+  (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
 
   (use-package which-key
     :config
@@ -319,14 +360,22 @@ Here's the core lsp-configuration:
 #+END_SRC
 I've changed the default prefix from "s-l" to "C-l".
 
+** Line numbers
+I want line numbers on all code editing buffers. Since they should all
+derive from prog-mode, I'll set line numbers there and hope for the
+best. The alternative is to enable global line numbers then turn it
+off in other modes, but that seems messier to me.
+#+BEGIN_SRC emacs-lisp
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+#+END_SRC
+
 ** Javascript/web development (lsp?)
 There are several ways to configure javascript & typescript
 support. I'm going with web-mode since it can handle template-based
 development (react, vue etc.) along with raw js & ts files.
 
 #+BEGIN_SRC emacs-lisp
-(use-package web-mode
-  :ensure t
+(use-package web-mode  :ensure t
   :mode (("\\.js\\'" . web-mode)
          ("\\.jsx\\'" . web-mode)
          ("\\.ts\\'" . web-mode)
@@ -335,7 +384,6 @@ development (react, vue etc.) along with raw js & ts files.
          ("\\.vue\\'" . web-mode)
 	 ("\\.json\\'" . web-mode))
   :commands web-mode
-  :hook ((web-mode-hook . company-mode))
   :config
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-css-indent-offset 2)
