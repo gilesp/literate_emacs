@@ -44,8 +44,8 @@
   - [[#projectile][Projectile]]
     - [[#counsel-projectile-org-capture][counsel-projectile-org-capture]]
   - [[#codetext-completion-company-mode][Code/Text Completion (company-mode)]]
-  - [[#development-languages][Development languages]]
   - [[#line-numbers][Line numbers]]
+  - [[#development-languages][Development languages]]
   - [[#javascriptweb-development-lsp][Javascript/web development (lsp?)]]
   - [[#org-mode-live-preview][Org mode live preview?]]
 
@@ -378,6 +378,15 @@ Got to have those sweet code-completion popups, courtesy of [[https://company-mo
     (global-company-mode))
 #+END_SRC
 
+** Line numbers
+I want line numbers on all code editing buffers. Since they should all
+derive from prog-mode, I'll set line numbers there and hope for the
+best. The alternative is to enable global line numbers then turn it
+off in other modes, but that seems messier to me.
+#+BEGIN_SRC emacs-lisp
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+#+END_SRC
+
 ** Development languages
 I'm going to try lsp-mode again, for languages it supports.
 Here's the core lsp-configuration:
@@ -404,38 +413,45 @@ Here's the core lsp-configuration:
 #+END_SRC
 I've changed the default prefix from "s-l" to "C-l".
 
-** Line numbers
-I want line numbers on all code editing buffers. Since they should all
-derive from prog-mode, I'll set line numbers there and hope for the
-best. The alternative is to enable global line numbers then turn it
-off in other modes, but that seems messier to me.
-#+BEGIN_SRC emacs-lisp
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
-#+END_SRC
-
 ** Javascript/web development (lsp?)
 There are several ways to configure javascript & typescript
 support. I'm going with web-mode since it can handle template-based
 development (react, vue etc.) along with raw js & ts files.
 
 #+BEGIN_SRC emacs-lisp
-(use-package web-mode  :ensure t
-  :mode (("\\.js\\'" . web-mode)
-         ("\\.jsx\\'" . web-mode)
-         ("\\.ts\\'" . web-mode)
-         ("\\.tsx\\'" . web-mode)
-         ("\\.html\\'" . web-mode)
-         ("\\.vue\\'" . web-mode)
-	 ("\\.json\\'" . web-mode))
-  :commands web-mode
-  :config
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-css-indent-offset 2)
-  (setq web-mode-code-indent-offset 2)
-  (setq web-mode-enable-part-face t)
-  (setq web-mode-content-types-alist
-	'(("jsx" . "\\.js[x]?\\'")))
-  )
+  ;; (use-package tide
+  ;;   :hook (
+  ;;        (web-mode . setup-tide-mode)
+  ;; 	 )
+  ;;   :config
+  ;;   (defun setup-tide-mode ()
+  ;;     (interactive)
+  ;;     (tide-setup)
+  ;;     (eldoc-mode +1)
+  ;;     (company-mode +1)
+  ;;     (local-set-key [f1] 'tide-documentation-at-point))
+  ;;   (setq company-tooltip-align-annotations t)
+  ;;   (setq tide-sort-completions-by-kind t)
+  ;; )
+  (use-package web-mode
+    :ensure t
+    :mode (("\\.js\\'" . web-mode)
+	   ("\\.jsx\\'" . web-mode)
+	   ("\\.ts\\'" . web-mode)
+	   ("\\.tsx\\'" . web-mode)
+	   ("\\.html\\'" . web-mode)
+	   ("\\.vue\\'" . web-mode)
+	   ("\\.json\\'" . web-mode))
+    :commands web-mode
+    :config
+    (setq company-tooltip-align-annotations t)
+    (setq web-mode-markup-indent-offset 2)
+    (setq web-mode-css-indent-offset 2)
+    (setq web-mode-code-indent-offset 2)
+    (setq web-mode-enable-part-face t)
+    (setq web-mode-content-types-alist
+	  '(("jsx" . "\\.js[x]?\\'")))
+    )
 #+END_SRC
 
 You will need to install the [[https://github.com/sourcegraph/javascript-typescript-langserver][javascript-typescript-langserver]] for lsp
