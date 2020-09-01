@@ -35,6 +35,7 @@
     - [[#theme][Theme]]
   - [[#org-mode][Org Mode]]
     - [[#toc-org][Toc-org]]
+  - [[#org-roam][Org Roam]]
   - [[#markdown][Markdown]]
   - [[#git-stuff][Git stuff]]
   - [[#completion-framework][Completion Framework]]
@@ -97,15 +98,11 @@ This is me
 ** Package Management
 *** Sources
 
-Before doing anything else, I need to configure [[melpa.org][melpa] as
-a source for packages.
-
-**** Melpa config
-#+BEGIN_SRC emacs-lisp
-  (require 'package)
-  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-  (package-initialize)
-#+END_SRC
+Initially I defined the package sources here, but because we use org
+in the init.el, the built-in org version would always get used, rather
+than the version from orgmode.org. This caused issues with
+incompatible versions. To avoid that, all the package archive
+configuration has been moved to [[./init.el]]
 
 *** Use-Package
 
@@ -122,6 +119,14 @@ unless told otherwise, this speeds up initialisation.
 	use-package-always-defer t)
   (require 'use-package)
   (require 'use-package-ensure)
+#+END_SRC
+
+I like to make sure all my packages are up to date, so I use auto-package-update.
+#+BEGIN_SRC emacs-lisp
+(use-package auto-package-update
+  :init
+  (auto-package-update-maybe)
+  (setq auto-package-update-delete-old-versions t))
 #+END_SRC
 
 ** Editor Configuration
@@ -254,11 +259,20 @@ I like a dark editor, and base16-brewer is what I've got used to
 
 ** Org Mode
 #+BEGIN_SRC emacs-lisp
-(use-package org
-  :init
-  (setq org-src-tab-acts-natively t))
+  (use-package org
+    :pin org ;; use version from orgmode.org/elpa instead of gnu.
+    :custom
+    (org-src-tab-acts-natively t)
+    (org-src-window-setup 'current-window) ;; edit src blocks in place, rather than a new window
+    (org-hide-emphasis-markers t) ;;actually emphasise text (e.g. show as italic instead of /italic/)
+    )
+
+  (use-package org-plus-contrib
+    :pin org
+    :after org)
 #+END_SRC
 
+Here, I'm telling org mode to hide the emphasis markup (/.../ for italics, *...* for bold etc.)
 *** Toc-org
 Install the =toc-org= package after org mode is loaded. This enables
 automatic generation of up to date tables of contents.
@@ -267,9 +281,31 @@ automatic generation of up to date tables of contents.
   (use-package toc-org
     :ensure t
     :after org
-    :hook (org-mode . toc-org-enable))
+    :hook (org-mode . toc-org-mode))
 
 #+END_SRC
+** Org Roam
+I'm going to try using [[https://www.orgroam.com/][org roam]] to manage my note-taking. It's based
+around the [[https://en.wikipedia.org/wiki/Zettelkasten][Zettelkasten]] technique, which is similar to how I've made
+notes in the past, only more organised ;-)
+
+org-roam requires sqlite3 to be installed, so if it isn't, run this:
+#+BEGIN_SRC sh
+sudo apt install sqlite3
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (use-package org-roam
+    :init (setq org-roam-directory "~/Documents/Dropbox/org-roam")
+    :after org
+    :hook (org-mode . org-roam-mode)
+    :commands (org-roam-buffer-toggle-display
+	       org-roam-find-file
+	       org-roam-graph))
+#+END_SRC
+
+I'm telling org roam where to store my notes (my dropbox folder so
+they get synched between machines).
 
 ** Markdown
 Sometimes I need to edit markdown, so here's how to configure [[https://github.com/jrblevin/markdown-mode][markdown-mode]].
