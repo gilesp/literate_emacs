@@ -21,6 +21,8 @@
     - [[#keep-changes-from-customize-in-a-separate-file][Keep changes from 'customize' in a separate file]]
     - [[#save-all-backups-in-one-place][Save all backups in one place]]
     - [[#get-rid-of-the-startup-screen][Get rid of the startup screen]]
+    - [[#a-function-to-set-the-framesize-for-streaming][A function to set the framesize for streaming]]
+    - [[#set-initial-window-frame-size][Set initial window (frame) size]]
     - [[#unbind-the-pesky-sleep-key][Unbind the pesky sleep key]]
     - [[#use-y-or-n-instead-of-yes-or-no][Use 'y' or 'n' instead of 'yes' or 'no']]
     - [[#enable-recentf-mode-recent-files][Enable recentf mode (recent-files)]]
@@ -141,7 +143,49 @@ unless told otherwise, this speeds up initialisation.
 #+BEGIN_SRC emacs-lisp
   (setq inhibit-startup-screen t)
 #+END_SRC
+*** A function to set the framesize for streaming
+Sometimes I want to show emacs via OBS Studio, which I have set to
+1280x720p. A frame size of 109x31 fits perfectly for me. Here's a
+function I can call to switch to toggle between that frame size and my
+normal one, when I need it.
+#+BEGIN_SRC emacs-lisp
+  (defvar gp/frame-normal-width 110)
+  (defvar gp/frame-normal-height 58)
+  (defvar gp/frame-streaming-width 109)
+  (defvar gp/frame-streaming-height 31)
+  (defvar gp/is-streaming-size nil)
 
+  (defun gp/frame-size-streaming ()
+    "Sets the frame size so it's suitable for streaming via OBS at 720p"
+    (interactive)
+    (set-frame-width (selected-frame) gp/frame-streaming-width)
+    (set-frame-height (selected-frame) gp/frame-streaming-height)
+    (setq gp/is-streaming-size t))
+
+  (defun gp/frame-size-normal ()
+    "Sets the frame size to my default values"
+    (interactive)
+    (set-frame-width (selected-frame) gp/frame-normal-width)
+    (set-frame-height (selected-frame) gp/frame-normal-height)
+    (setq gp/is-streaming-size nil))
+
+  (defun gp/streaming-toggle ()
+    "Toggles between streaming and normal frame sizes"
+    (interactive)
+    (if (eq gp/is-streaming-size nil)
+      (gp/frame-size-streaming)
+    ; else
+    (gp/frame-size-normal)))
+#+END_SRC
+*** Set initial window (frame) size
+Re-use the values for my normal frame width & height.
+#+BEGIN_SRC emacs-lisp
+  (setq initial-frame-alist
+      '(
+	(width . gp/frame-normal-width) ; character
+	(height . gp/frame-normal-height) ; lines
+	))
+#+END_SRC
 *** Unbind the pesky sleep key 
 #+BEGIN_SRC emacs-lisp
   (global-unset-key [(control z)])
