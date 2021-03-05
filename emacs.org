@@ -18,9 +18,10 @@
     - [[#sources][Sources]]
     - [[#use-package][Use-Package]]
   - [[#editor-configuration][Editor Configuration]]
+    - [[#fix-defaults][Fix defaults]]
     - [[#keep-changes-from-customize-in-a-separate-file][Keep changes from 'customize' in a separate file]]
-    - [[#save-all-backups-in-one-place][Save all backups in one place]]
-    - [[#get-rid-of-the-startup-screen][Get rid of the startup screen]]
+    - [[#disable-backup-files][Disable backup files]]
+    - [[#utf-8-all-the-things][UTF-8 all the things!]]
     - [[#a-function-to-set-the-framesize-for-streaming][A function to set the framesize for streaming]]
     - [[#set-initial-window-frame-size][Set initial window (frame) size]]
     - [[#unbind-the-pesky-sleep-key][Unbind the pesky sleep key]]
@@ -31,8 +32,13 @@
     - [[#remove-toolbar][Remove toolbar]]
     - [[#column-numbering-in-mode-line][Column numbering in mode line]]
     - [[#show-trailing-white-space][Show trailing white space]]
+    - [[#highlight-current-line][Highlight current line]]
     - [[#diminish][Diminish]]
+    - [[#undo-tree][Undo Tree]]
     - [[#theme][Theme]]
+    - [[#fonts][Fonts]]
+  - [[#convenience-enhancements][Convenience Enhancements]]
+    - [[#which-key][Which key]]
   - [[#org-mode][Org Mode]]
     - [[#toc-org][Toc-org]]
   - [[#org-roam][Org Roam]]
@@ -40,6 +46,7 @@
   - [[#git-stuff][Git stuff]]
   - [[#completion-framework][Completion Framework]]
     - [[#ivy][Ivy]]
+    - [[#ivy-rich][Ivy-Rich]]
     - [[#counsel][Counsel]]
     - [[#swiper][Swiper]]
   - [[#projectile][Projectile]]
@@ -47,12 +54,14 @@
   - [[#codetext-completion-company-mode][Code/Text Completion (company-mode)]]
   - [[#line-numbers][Line numbers]]
   - [[#development-languages][Development languages]]
+  - [[#treemacs][Treemacs]]
   - [[#javascriptweb-development-lsp][Javascript/web development (lsp?)]]
   - [[#org-mode-live-preview][Org mode live preview?]]
 
 ** About this file
 This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's
-config]].
+config]]. I've also taken inspiration from
+https://blog.sumtypeofway.com/posts/emacs-config.html.
 
 This is a literate configuration, meaning that it's an org file with
 embedded code blocks that form the configuration for emacs. Having the
@@ -70,14 +79,11 @@ This tells emacs to automatically tangle (include) all code blocks in
 this file when generating the code for the config, unless the code
 block explicitly includes =:tangle no= as the above code block does.
 
-
 *** Visibility Settings
 Next we have a property defined on the [[Configuration][Configuration]] heading that
 defines the visibility that tells org to show it's direct children on
 startup. This way a clean outline of all sub headings under
 Configuration is shown each time this file is opened in org-mode.
-
-
 
 *** Table of Contents
 Finally, there is a [[Table of Contents][Table of Contents]] heading that includes the tag:
@@ -130,6 +136,18 @@ I like to make sure all my packages are up to date, so I use auto-package-update
 #+END_SRC
 
 ** Editor Configuration
+
+*** Fix defaults
+Reset some emacs defaults that date from prehistoric times
+
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-startup-screen t)      ;; No need for a startup screen
+  (setq initial-scratch-message nil)   ;; or to tell me what the scratch buffer is
+  (setq sentence-end-double-space nil) ;; Who the hell does this in 2021?
+  (setq mark-even-if-inactive nil)     ;; Fix undo in command affecting the mark.
+  (setq kill-whole-line t)             ;; Let C-k delete the whole line.
+#+END_SRC
+
 *** Keep changes from 'customize' in a separate file
 
 #+BEGIN_SRC emacs-lisp
@@ -137,17 +155,26 @@ I like to make sure all my packages are up to date, so I use auto-package-update
   (load custom-file)
 #+END_SRC
 
-*** Save all backups in one place
-
+*** Disable backup files
+I've never found emacs backup files to be particularly useful
 #+BEGIN_SRC emacs-lisp
-  (setq backup-directory-alist
-    `(("." . ,(concat user-emacs-directory "backups"))))
+  (setq make-backup-files nil)
+  (setq auto-save-default nil)
+  (setq create-lockfiles nil)
 #+END_SRC
 
-*** Get rid of the startup screen
+*** UTF-8 all the things!
+utf-8 should be the default for everything.
 #+BEGIN_SRC emacs-lisp
-  (setq inhibit-startup-screen t)
+  (set-charset-priority 'unicode)
+  (setq locale-coding-system 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (set-selection-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+  (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 #+END_SRC
+
 *** A function to set the framesize for streaming
 Sometimes I want to show emacs via OBS Studio, which I have set to
 1280x720p. A frame size of 109x31 fits perfectly for me. Here's a
@@ -182,6 +209,7 @@ normal one, when I need it.
     ; else
     (gp/frame-size-normal)))
 #+END_SRC
+
 *** Set initial window (frame) size
 Re-use the values for my normal frame width & height.
 #+BEGIN_SRC emacs-lisp
@@ -191,7 +219,8 @@ Re-use the values for my normal frame width & height.
 	(height . gp/frame-normal-height) ; lines
 	))
 #+END_SRC
-*** Unbind the pesky sleep key 
+
+*** Unbind the pesky sleep key
 #+BEGIN_SRC emacs-lisp
   (global-unset-key [(control z)])
   (global-unset-key [(control x)(control z)])
@@ -203,12 +232,18 @@ Re-use the values for my normal frame width & height.
 #+END_SRC
 
 *** Enable recentf mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
+Recentf is useful to re-open a file you worked on recently, but it's good to set some limits on it.
+Also, ignore any package files from elpa, as they make it less than useful.
 #+BEGIN_SRC emacs-lisp
+  (require 'recentf)
   (recentf-mode 1)
   (setq recentf-max-menu-items 50)
   (setq recentf-max-saved-items 250)
-  (global-set-key "\C-x\ \C-r" 'recentf-open-files)
+  ;; (global-set-key "\C-x\ \C-r" 'recentf-open-files)
+  (add-to-list 'recentf-exclude "\\elpa")
 #+END_SRC
+
+I've replaced the recentf-open-files keybinding with counsel-recentf instead.
 
 *** Enable overwriting selected text
 #+BEGIN_SRC emacs-lisp
@@ -231,18 +266,44 @@ Re-use the values for my normal frame width & height.
 (column-number-mode 1)
 #+END_SRC
 
-*** Show trailing white space 
+*** Show trailing white space
 Show white space at the ends of line, to avoid embarassment when
 comitting something. Then delete them with M-x delete-trailing-whitespace
 #+BEGIN_SRC emacs-lisp
-(setq-default show-trailing-whitespace t)
+  (setq-default show-trailing-whitespace t)
+#+END_SRC
+
+actually, just delete them automatically when we save.
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'before-save-hook #'delete-trailing-whitespace)
+#+END_SRC
+
+*** Highlight current line
+This is useful in many situations, so enable it for programming and
+text editing based modes.
+#+BEGIN_SRC emacs-lisp
+  (require 'hl-line)
+  (add-hook 'prog-mode-hook #'hl-line-mode)
+  (add-hook 'text-mode-hook #'hl-line-mode)
 #+END_SRC
 
 *** Diminish
-Use diminish so that use-package can hid modes from the mode line when
+Use diminish so that use-package can hide modes from the mode line when
 we ask it to.
 #+BEGIN_SRC emacs-lisp
 (use-package diminish)
+#+END_SRC
+
+*** Undo Tree
+Emacs has a powerful, but confusing, undo model. Undo tree makes it
+easier to use and lets you get back pretty much anything you've done.
+#+BEGIN_SRC emacs-lisp
+(use-package undo-tree
+  :diminish
+  :bind (("C-c _" . undo-tree-visualize))
+  :config
+  (global-undo-tree-mode +1)
+  (unbind-key "M-_" undo-tree-map))
 #+END_SRC
 
 *** Theme
@@ -255,6 +316,30 @@ I like a dark editor, and base16-brewer is what I've got used to
 (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes"))
 (load-theme 'vscode-dark-plus t)
 ;;(load-theme 'base16-vscode-dark t)
+#+END_SRC
+
+*** Fonts
+A matter of personal opinion, but a modern mono-spaced font makes
+emacs look a lot better. I'm currently trying [[https://github.com/microsoft/cascadia-code][Cascadia Code]], which can
+be installed on debian with =sudo apt install fonts-cascadia-code=
+
+#+BEGIN_SRC emacs-lisp
+  (ignore-errors (set-frame-font "Cascadia Code-13"))
+#+END_SRC
+
+** Convenience Enhancements
+
+*** Which key
+[[https://github.com/justbur/emacs-which-key][Which-key]] enables discoverability of available commands.
+
+If you ever want to just explore the available keybindings, then try
+=M-x which-key-show-top-level= or =M-x which-key-show-major-mode=
+
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :config
+    (which-key-mode 1)
+    (which-key-setup-side-window-bottom))
 #+END_SRC
 
 ** Org Mode
@@ -285,16 +370,21 @@ automatic generation of up to date tables of contents.
 
 #+END_SRC
 ** Org Roam
-I'm going to try using [[https://www.orgroam.com/][org roam]] to manage my note-taking. It's based
-around the [[https://en.wikipedia.org/wiki/Zettelkasten][Zettelkasten]] technique, which is similar to how I've made
-notes in the past, only more organised ;-)
+I'm not using org roam at the moment so this config is disabled.
 
-org-roam requires sqlite3 to be installed, so if it isn't, run this:
+I didn't get the chance to use it properly so there's no point leaving
+it hanging around.
+
++I'm going to try using [[https://www.orgroam.com/][org roam]] to manage my note-taking. It's based+
++around the [[https://en.wikipedia.org/wiki/Zettelkasten][Zettelkasten]] technique, which is similar to how I've made+
++notes in the past, only more organised ;-)+
+
++org-roam requires sqlite3 to be installed, so if it isn't, run this:+
 #+BEGIN_SRC sh
 sudo apt install sqlite3
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package org-roam
     :init (setq org-roam-directory "~/Documents/Dropbox/org-roam")
     :after org
@@ -351,26 +441,40 @@ I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, inst
 #+BEGIN_SRC emacs-lisp
   (use-package ivy
     :diminish ivy-mode
+    :custom
+    (ivy-height 30)
+    (ivy-use-virtual-buffers t)
+    (ivy-use-selectable-prompt t)
+    (ivy-count-format "(%d/%d) ")
     :config
-    (ivy-mode 1)
-    ;; add 'recent-mode' and bookmarks to 'ivy-switch-buffer'.
-    (setq ivy-use-virtual-buffers t)
-    ;; number of result lines to display
-    ;;(setq ivy-height 10)
-    (setq ivy-count-format "(%d/%d) ")
-    (setq ivy-display-style 'fancy))
+    (ivy-mode 1))
 #+END_SRC
 
-I'll start with a minimal config - just setting the options recommended int he getting started section of the documentation.
+I'll start with a minimal config - just setting the options recommended int the getting started section of the documentation.
+
+*** Ivy-Rich
+Ivy-rich enables prettifying the ivy output
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy-rich
+    :custom
+    (ivy-virtual-abbreviate 'full)
+    ;;(ivy-rich-switch-buffer-align-virtual-buffer nil)
+    (ivy-rich-path-style 'full)
+    :config
+    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+    (ivy-rich-mode 1))
+#+END_SRC
 
 *** Counsel
 Similarly, for Counsel, I'll just enable counsel-mode to default to using counsel.
 #+BEGIN_SRC emacs-lisp
-  (use-package counsel-projectile)
   (use-package counsel
     :diminish counsel-mode
+    :bind (("C-x C-r" . counsel-recentf))
     :config
     (counsel-mode 1))
+
+  (use-package counsel-projectile)
 #+END_SRC
 
 *** Swiper
@@ -405,11 +509,25 @@ And since I'm currently using Ivy & Counsel, I'll include the [[https://github.c
     (counsel-projectile-mode))
 #+END_SRC
 *** TODO [[https://github.com/ericdanan/counsel-projectile#setting-counsel-projectile-org-capture-templates][counsel-projectile-org-capture]]
+
 ** Code/Text Completion (company-mode)
 Got to have those sweet code-completion popups, courtesy of [[https://company-mode.github.io/][company-mode]].
 #+BEGIN_SRC emacs-lisp
   (use-package company
     :diminish
+    :bind (("C-." . #'company-complete))
+    :custom
+    (company-dabbrev-downcase nil "Don't downcase returned candidates.")
+    (company-show-numbers t "Numbers are helpful.")
+    (company-tooltip-limit 20 "The more the merrier.")
+    (company-tooltip-idle-delay 0.4 "Faster!")
+    (company-async-timeout 20 "Some requests can take a long time. That's fine.")
+    :config
+    ;; Use the numbers 0-9 to select company completion candidates
+    (let ((map company-active-map))
+      (mapc (lambda (x) (define-key map (format "%d" x)
+			  `(lambda () (interactive) (company-complete-number ,x))))
+	    (number-sequence 0 9)))
     :init
     (global-company-mode))
 #+END_SRC
@@ -425,29 +543,107 @@ off in other modes, but that seems messier to me.
 
 ** Development languages
 I'm going to try lsp-mode again, for languages it supports.
+
+Emacs 27 with lsp-mode is super fast and really good to use.
+
 Here's the core lsp-configuration:
 #+BEGIN_SRC emacs-lisp
-  (setq lsp-keymap-prefix "C-l")
-
   (use-package lsp-mode
     :hook (
 	   ;; bind lsp to the development modes I'm interested in.
 	   (web-mode . lsp-deferred)
 	   (lsp-mode . lsp-enable-which-key-integration))
     :init
+    (setq lsp-keymap-prefix "C-l")
     (setq lsp-enable-completion-at-point t)
     (setq lsp-enable-indentation t)
     (setq lsp-enable-on-type-formatting t)
+    (setq gc-cons-threshold 100000000)
+    (setq read-process-output-max (* 1024 1024)) ;; 1mb
     :commands lsp lsp-deferred)
 
-  (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
   (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
 
-  (use-package which-key
-    :config
-    (which-key-mode))
 #+END_SRC
 I've changed the default prefix from "s-l" to "C-l".
+
+According to the [[https://emacs-lsp.github.io/lsp-mode/page/performance/][lsp-mode documentation]], a few things should be
+tweaked for maximum performance.
+
+The default setting is too low for lsp-mode's needs due to the fact
+that client/server communication generates a lot of
+memory/garbage. I've taken the easy approach of just setting this to
+100mb in the lsp-mode init section above.
+#+BEGIN_SRC emacs-lisp :tangle no
+(setq gc-cons-threshold 100000000)
+#+END_SRC
+
+Similarly the the amount of data which Emacs reads from the process
+needs increasing. The emacs default (4k) is too low considering that
+some of the language server responses are in 800k - 3M range.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(setq read-process-output-max (* 1024 1024)) ;; 1mb
+#+END_SRC
+
+Turn on ivy integration for lsp:
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-ivy
+    :after (ivy lsp-mode))
+#+END_SRC
+
+And also turn on company mode integration
+#+BEGIN_SRC emacs-lisp
+  (use-package company-lsp
+    :custom (company-lsp-enable-snippet t)
+    :after (company lsp-mode))
+#+END_SRC
+
+Sometimes I want an IDE style tree view, so lets enable treemacs and lsp-treemacs
+#+BEGIN_SRC emacs-lisp
+    (use-package lsp-treemacs
+      :after (treemacs lsp-mode))
+#+END_SRC
+
+** Treemacs
+Treemacs provides a very configurable tree-view. I'm going to see how
+I get on with it, so I've just grabbed a basic config from the
+[[https://github.com/Alexander-Miller/treemacs][treemacs documentation]].
+
+C-x t t should toggle the treeview, and I'll see how I get on with that.
+
+#+BEGIN_SRC emacs-lisp
+(use-package treemacs
+  :ensure t
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;;(treemacs-resize-icons 44)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode 'always))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+#+END_SRC
+
+And since we're also using projectile, let's enable treemacs integration
+#+BEGIN_SRC emacs-lisp
+  (use-package treemacs-projectile
+    :after (treemacs projectile)
+    :ensure t)
+#+END_SRC
 
 ** Javascript/web development (lsp?)
 There are several ways to configure javascript & typescript
@@ -501,4 +697,3 @@ you could avoid installing npm/node on your local machine. I'll have
 to give that another go sometime.
 
 ** TODO Org mode live preview?
-
