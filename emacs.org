@@ -46,8 +46,8 @@
   - [[#git-stuff][Git stuff]]
   - [[#completion-framework][Completion Framework]]
     - [[#ivy][Ivy]]
-    - [[#ivy-rich][Ivy-Rich]]
     - [[#counsel][Counsel]]
+    - [[#ivy-rich][Ivy-Rich]]
     - [[#swiper][Swiper]]
   - [[#projectile][Projectile]]
     - [[#counsel-projectile-org-capture][counsel-projectile-org-capture]]
@@ -278,6 +278,13 @@ actually, just delete them automatically when we save.
   (add-hook 'before-save-hook #'delete-trailing-whitespace)
 #+END_SRC
 
+Show whitespace also applies to the minibuffer by default, which
+rather spoils ivy and counsel output. Let's disable that behaviour:
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'minibuffer-setup-hook
+	    (lambda () (setq-local show-trailing-whitespace nil)))
+#+END_SRC
+
 *** Highlight current line
 This is useful in many situations, so enable it for programming and
 text editing based modes.
@@ -452,19 +459,6 @@ I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, inst
 
 I'll start with a minimal config - just setting the options recommended int the getting started section of the documentation.
 
-*** Ivy-Rich
-Ivy-rich enables prettifying the ivy output
-#+BEGIN_SRC emacs-lisp
-  (use-package ivy-rich
-    :custom
-    (ivy-virtual-abbreviate 'full)
-    ;;(ivy-rich-switch-buffer-align-virtual-buffer nil)
-    (ivy-rich-path-style 'full)
-    :config
-    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
-    (ivy-rich-mode 1))
-#+END_SRC
-
 *** Counsel
 Similarly, for Counsel, I'll just enable counsel-mode to default to using counsel.
 #+BEGIN_SRC emacs-lisp
@@ -477,12 +471,27 @@ Similarly, for Counsel, I'll just enable counsel-mode to default to using counse
   (use-package counsel-projectile)
 #+END_SRC
 
+*** Ivy-Rich
+Ivy-rich enables prettifying the ivy output
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy-rich
+    :hook ((ivy-mode counsel-mode) . ivy-rich-mode)
+    :custom
+    (ivy-virtual-abbreviate 'abbreviate)
+    (ivy-rich-path-style 'abbrev)
+    :config
+    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
+#+END_SRC
+
 *** Swiper
 And finally, swiper for searching. I bind it to C-s so that I use it instead of i-search.
+
+I'm now binding swiper-thing-at-point to C-s since I'm usually
+searching for th thing I'm looking at.
 #+BEGIN_SRC emacs-lisp
   (use-package swiper
     :commands (swiper swiper-all)
-    :bind ("C-s" . 'swiper))
+    :bind ("C-s" . 'swiper-thing-at-point))
 #+END_SRC
 
 ** Projectile
