@@ -285,6 +285,13 @@ rather spoils ivy and counsel output. Let's disable that behaviour:
 	    (lambda () (setq-local show-trailing-whitespace nil)))
 #+END_SRC
 
+Also, it applies to ansi-term as well, which just looks weird. So I'll
+turn it off there too.
+#+BEGIN_SRC emacs-lisp
+    (add-hook 'term-mode-hook
+	      (lambda () (setq show-trailing-whitespace nil)))
+#+END_SRC
+
 *** Highlight current line
 This is useful in many situations, so enable it for programming and
 text editing based modes.
