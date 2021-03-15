@@ -56,6 +56,7 @@
   - [[#development-languages][Development languages]]
   - [[#treemacs][Treemacs]]
   - [[#javascriptweb-development-lsp][Javascript/web development (lsp?)]]
+  - [[#yaml][Yaml]]
   - [[#org-mode-live-preview][Org mode live preview?]]
 
 ** About this file
@@ -568,6 +569,7 @@ Here's the core lsp-configuration:
     :hook (
 	   ;; bind lsp to the development modes I'm interested in.
 	   (web-mode . lsp-deferred)
+	   (yaml-mode . lsp-deferred)
 	   (lsp-mode . lsp-enable-which-key-integration))
     :init
     (setq lsp-keymap-prefix "C-l")
@@ -705,4 +707,10 @@ Alternatively, this could be installed as a docker container, and then
 you could avoid installing npm/node on your local machine. I'll have
 to give that another go sometime.
 
+** Yaml
+#+BEGIN_SRC emacs-lisp
+  (use-package yaml-mode
+    :ensure t
+    :mode ("\\.ya?ml\\'" . yaml-mode))
+#+END_SRC
 ** TODO Org mode live preview?
