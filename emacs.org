@@ -608,13 +608,6 @@ Turn on ivy integration for lsp:
     :after (ivy lsp-mode))
 #+END_SRC
 
-And also turn on company mode integration
-#+BEGIN_SRC emacs-lisp
-  (use-package company-lsp
-    :custom (company-lsp-enable-snippet t)
-    :after (company lsp-mode))
-#+END_SRC
-
 Sometimes I want an IDE style tree view, so lets enable treemacs and lsp-treemacs
 #+BEGIN_SRC emacs-lisp
     (use-package lsp-treemacs
