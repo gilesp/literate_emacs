@@ -52,6 +52,7 @@
   - [[#projectile][Projectile]]
     - [[#counsel-projectile-org-capture][counsel-projectile-org-capture]]
   - [[#codetext-completion-company-mode][Code/Text Completion (company-mode)]]
+  - [[#parentheses][Parentheses]]
   - [[#line-numbers][Line numbers]]
   - [[#development-languages][Development languages]]
   - [[#treemacs][Treemacs]]
@@ -547,6 +548,11 @@ Got to have those sweet code-completion popups, courtesy of [[https://company-mo
 	    (number-sequence 0 9)))
     :init
     (global-company-mode))
+#+END_SRC
+** Parentheses
+I find it invaluable to have parentheses matching enabled.
+#+BEGIN SRC emacs-lisp
+  (show-paren-mode t)
 #+END_SRC
 
 ** Line numbers
