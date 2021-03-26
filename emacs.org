@@ -73,7 +73,7 @@ code it relates to.
 *** Automatically Tangle
 First there is a property defined on the file:
 
-#+BEGIN_SRC :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 header-args :tangle yes
 #+END_SRC
 
@@ -145,6 +145,8 @@ Reset some emacs defaults that date from prehistoric times
 #+BEGIN_SRC emacs-lisp
   (setq inhibit-startup-screen t)      ;; No need for a startup screen
   (setq initial-scratch-message nil)   ;; or to tell me what the scratch buffer is
+  (setq inhibit-startup-echo-area-message t)
+  (setq inhibit-startup-message t)
   (setq sentence-end-double-space nil) ;; Who the hell does this in 2021?
   (setq mark-even-if-inactive nil)     ;; Fix undo in command affecting the mark.
   (setq kill-whole-line t)             ;; Let C-k delete the whole line.
@@ -323,7 +325,8 @@ easier to use and lets you get back pretty much anything you've done.
 #+END_SRC
 
 *** Theme
-I like a dark editor, and base16-brewer is what I've got used to
+I like a dark editor, and base16-brewer is what I've got used
+previously. But now I'm trying a vscode dark theme.
 #+BEGIN_SRC emacs-lisp
     ;; (use-package base16-theme
     ;;     :ensure t
@@ -336,11 +339,25 @@ I like a dark editor, and base16-brewer is what I've got used to
 
 *** Fonts
 A matter of personal opinion, but a modern mono-spaced font makes
-emacs look a lot better. I'm currently trying [[https://github.com/microsoft/cascadia-code][Cascadia Code]], which can
-be installed on debian with =sudo apt install fonts-cascadia-code=
+emacs look a lot better. I'm currently trying +[[https://github.com/microsoft/cascadia-code][Cascadia Code]], which can
+be installed on debian with =sudo apt install fonts-cascadia-code=+
+Roboto Mono Light and Fira Code.
+
+I'm setting Roboto Light for the variable pitch font and Fira Code for
+fixed-pitch (i.e. monospace)
 
 #+BEGIN_SRC emacs-lisp
-  (ignore-errors (set-frame-font "Cascadia Code-13"))
+  (set-face-attribute 'default nil :font "Cascadia Code 14")
+  (set-face-attribute 'fixed-pitch nil :font "Cascadia Code 14")
+  (set-face-attribute 'variable-pitch nil :font "Roboto Light 16")
+
+  (dolist (face '(default fixed-pitch))
+    (set-face-attribute `,face nil :font "Cascadia Code 14"))
+
+  ;;(add-to-list 'default-frame-alist '(font . "Roboto Mono Light 14"))
+  ;;(set-fontset-font "fontset-default"  '(#x2600 . #x26ff) "Fira Code 16")
+  (setq-default line-spacing 0)
+  (setq x-underline-at-descent-line t)
 #+END_SRC
 
 ** Convenience Enhancements
@@ -362,8 +379,10 @@ If you ever want to just explore the available keybindings, then try
 #+BEGIN_SRC emacs-lisp
   (use-package org
     :pin org ;; use version from orgmode.org/elpa instead of gnu.
+    :hook (org-mode . variable-pitch-mode) ;; enable a mix of proportional and fixed width fonts.
     :custom
     (org-src-tab-acts-natively t)
+    (org-src-fontify-natively t) ;; native src block fontification
     (org-src-window-setup 'current-window) ;; edit src blocks in place, rather than a new window
     (org-hide-emphasis-markers t) ;;actually emphasise text (e.g. show as italic instead of /italic/)
     )
@@ -373,7 +392,30 @@ If you ever want to just explore the available keybindings, then try
     :after org)
 #+END_SRC
 
-Here, I'm telling org mode to hide the emphasis markup (/.../ for italics, *...* for bold etc.)
+To make org mode look a bit nicer, I like to use the org-bullets
+package to replace headline markers with Unicode bullets.
+#+begin_src emacs-lisp
+  (use-package org-bullets
+  :hook (org-mode . org-bullets-mode))
+#+end_src
+
+In order for variable-pitch-mode to work properyl, I need to set fixed pitch fonts for various org faces:
+
+#+begin_src emacs-lisp
+  (custom-theme-set-faces
+     'user
+     '(org-block ((t (:inherit fixed-pitch))))
+     '(org-code ((t (:inherit (shadow fixed-pitch)))))
+     '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+     '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
+     '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+     '(org-property-value ((t (:inherit fixed-pitch))) t)
+     '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+     '(org-table ((t (:inherit fixed-pitch))))
+     '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+     '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
+#+end_src
+
 *** Toc-org
 Install the =toc-org= package after org mode is loaded. This enables
 automatic generation of up to date tables of contents.
