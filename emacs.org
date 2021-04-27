@@ -332,7 +332,6 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
 #+END_SRC
 
 ** Convenience Enhancements
-
 *** Which key
 [[https://github.com/justbur/emacs-which-key][Which-key]] enables discoverability of available commands.
 
@@ -379,7 +378,20 @@ For this, I make use of [[https://elpa.gnu.org/packages/adaptive-wrap.html][adap
   (use-package perfect-margin
     :hook (org-mode . perfect-margin-mode)
     :custom
-    (perfect-margin-visible-width 80))
+    (perfect-margin-visible-width 80)
+    :init
+    (defcustom perfect-margin-ignore-regexps
+      '("^minibuf" "^[*]" "^magit")
+      "List of strings to determine if window is ignored.
+  Each string is used as regular expression to match the window buffer name."
+      :group 'perfect-margin)
+
+    (defcustom perfect-margin-ignore-filters
+      '(window-minibuffer-p)
+      "List of functions to determine if window is ignored.
+  Each function is called with window as its sole arguemnt, returning a non-nil value indicate to ignore the window."
+      :group 'perfect-margin)
+    )
 #+END_SRC
 
 To make org mode look a bit nicer, I like to use the org-bullets package to replace headline markers with Unicode bullets.
