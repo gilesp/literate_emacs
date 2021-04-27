@@ -594,8 +594,13 @@ Got to have those sweet code-completion popups, courtesy of [[https://company-mo
 #+END_SRC
 ** Parentheses
 I find it invaluable to have parentheses matching enabled.
-#+BEGIN SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (show-paren-mode t)
+#+END_SRC
+And I like the visual delimitation of colour. Rainbow-delimiters adds that.
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 
 ** Line numbers
