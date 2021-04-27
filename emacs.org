@@ -19,7 +19,7 @@
     - [[#use-package][Use-Package]]
   - [[#editor-configuration][Editor Configuration]]
     - [[#fix-defaults][Fix defaults]]
-    - [[#keep-changes-from-customize-in-a-separate-file][Keep changes from 'customize' in a separate file]]
+    - [[#disable-use-of-the-customize-file][Disable use of the customize file]]
     - [[#disable-backup-files][Disable backup files]]
     - [[#utf-8-all-the-things][UTF-8 all the things!]]
     - [[#a-function-to-set-the-framesize-for-streaming][A function to set the framesize for streaming]]
@@ -131,11 +131,12 @@ Reset some emacs defaults that date from prehistoric times
   (setq kill-whole-line t)             ;; Let C-k delete the whole line.
 #+END_SRC
 
-*** Keep changes from 'customize' in a separate file
+*** Disable use of the customize file
+    I find this annoying, as it's all too easy to override something by accident with the customize functionality, then your emacs init doesn't work. You can't get rid of it completely, but you can point it at a random file every time.
 
 #+BEGIN_SRC emacs-lisp
-  (setq custom-file (expand-file-name "customize.el" user-emacs-directory))
-  (load custom-file)
+  (setq custom-file (make-temp-file ""))
+  (setq custom-safe-themes t)
 #+END_SRC
 
 *** Disable backup files
