@@ -61,14 +61,9 @@
   - [[#org-mode-live-preview][Org mode live preview?]]
 
 ** About this file
-This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's
-config]]. I've also taken inspiration from
-https://blog.sumtypeofway.com/posts/emacs-config.html.
+This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]]. I've also taken inspiration from https://blog.sumtypeofway.com/posts/emacs-config.html.
 
-This is a literate configuration, meaning that it's an org file with
-embedded code blocks that form the configuration for emacs. Having the
-code blocks in an org file allows me to document everything with the
-code it relates to.
+This is a literate configuration, meaning that it's an org file with embedded code blocks that form the configuration for emacs. Having the code blocks in an org file allows me to document everything with the code it relates to.
 
 *** Automatically Tangle
 First there is a property defined on the file:
@@ -77,23 +72,13 @@ First there is a property defined on the file:
 header-args :tangle yes
 #+END_SRC
 
-This tells emacs to automatically tangle (include) all code blocks in
-this file when generating the code for the config, unless the code
-block explicitly includes =:tangle no= as the above code block does.
+This tells emacs to automatically tangle (include) all code blocks in this file when generating the code for the config, unless the code block explicitly includes =:tangle no= as the above code block does.
 
 *** Visibility Settings
-Next we have a property defined on the [[Configuration][Configuration]] heading that
-defines the visibility that tells org to show it's direct children on
-startup. This way a clean outline of all sub headings under
-Configuration is shown each time this file is opened in org-mode.
+Next we have a property defined on the [[Configuration][Configuration]] heading that defines the visibility that tells org to show it's direct children on startup. This way a clean outline of all sub headings under Configuration is shown each time this file is opened in org-mode.
 
 *** Table of Contents
-Finally, there is a [[Table of Contents][Table of Contents]] heading that includes the tag:
-=:TOC_3_gh:=. This tells an org-mode package =toc-org= to generate a
-table of contents under this heading that has a max depth of 3 and is
-created using Github-style hrefs. This table of contents is updated
-everytime the file is saved and makes for a functional table of
-contents that works properly directly on github.
+Finally, there is a [[Table of Contents][Table of Contents]] heading that includes the tag: =:TOC_3_gh:=. This tells an org-mode package =toc-org= to generate a table of contents under this heading that has a max depth of 3 and is created using Github-style hrefs. This table of contents is updated everytime the file is saved and makes for a functional table of contents that works properly directly on github.
 
 ** Personal Information
 This is me
@@ -106,17 +91,11 @@ This is me
 ** Package Management
 *** Sources
 
-Initially I defined the package sources here, but because we use org
-in the init.el, the built-in org version would always get used, rather
-than the version from orgmode.org. This caused issues with
-incompatible versions. To avoid that, all the package archive
-configuration has been moved to [[./init.el]]
+Initially I defined the package sources here, but because we use org in the init.el, the built-in org version would always get used, rather than the version from orgmode.org. This caused issues with incompatible versions. To avoid that, all the package archive configuration has been moved to [[./init.el]]
 
 *** Use-Package
 
-I like to use [[https://github.com/jwiegley/use-package][use-package]] to keep things tidy and speedy on startup,
-so this makes sure it's available. I set it to defer loading packages
-unless told otherwise, this speeds up initialisation.
+I like to use [[https://github.com/jwiegley/use-package][use-package]] to keep things tidy and speedy on startup, so this makes sure it's available. I set it to defer loading packages unless told otherwise, this speeds up initialisation.
 
 #+BEGIN_SRC emacs-lisp
   (unless (package-installed-p 'use-package)
@@ -180,10 +159,7 @@ utf-8 should be the default for everything.
 #+END_SRC
 
 *** A function to set the framesize for streaming
-Sometimes I want to show emacs via OBS Studio, which I have set to
-1280x720p. A frame size of 109x31 fits perfectly for me. Here's a
-function I can call to switch to toggle between that frame size and my
-normal one, when I need it.
+Sometimes I want to show emacs via OBS Studio, which I have set to 1280x720p. A frame size of 109x31 fits perfectly for me. Here's a function I can call to switch to toggle between that frame size and my normal one, when I need it.
 #+BEGIN_SRC emacs-lisp
   (defvar gp/frame-normal-width 110)
   (defvar gp/frame-normal-height 58)
@@ -212,6 +188,8 @@ normal one, when I need it.
       (gp/frame-size-streaming)
     ; else
     (gp/frame-size-normal)))
+
+  (gp/frame-size-normal)
 #+END_SRC
 
 *** Set initial window (frame) size
@@ -236,8 +214,7 @@ Re-use the values for my normal frame width & height.
 #+END_SRC
 
 *** Enable recentf mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
-Recentf is useful to re-open a file you worked on recently, but it's good to set some limits on it.
-Also, ignore any package files from elpa, as they make it less than useful.
+Recentf is useful to re-open a file you worked on recently, but it's good to set some limits on it. Also, ignore any package files from elpa, as they make it less than useful.
 #+BEGIN_SRC emacs-lisp
   (require 'recentf)
   (recentf-mode 1)
@@ -271,8 +248,7 @@ I've replaced the recentf-open-files keybinding with counsel-recentf instead.
 #+END_SRC
 
 *** Show trailing white space
-Show white space at the ends of line, to avoid embarassment when
-comitting something. Then delete them with M-x delete-trailing-whitespace
+Show white space at the ends of line, to avoid embarassment when comitting something. Then delete them with M-x delete-trailing-whitespace
 #+BEGIN_SRC emacs-lisp
   (setq-default show-trailing-whitespace t)
 #+END_SRC
@@ -282,15 +258,13 @@ actually, just delete them automatically when we save.
   (add-hook 'before-save-hook #'delete-trailing-whitespace)
 #+END_SRC
 
-Show whitespace also applies to the minibuffer by default, which
-rather spoils ivy and counsel output. Let's disable that behaviour:
+Show whitespace also applies to the minibuffer by default, which rather spoils ivy and counsel output. Let's disable that behaviour:
 #+BEGIN_SRC emacs-lisp
   (add-hook 'minibuffer-setup-hook
 	    (lambda () (setq-local show-trailing-whitespace nil)))
 #+END_SRC
 
-Also, it applies to ansi-term as well, which just looks weird. So I'll
-turn it off there too.
+Also, it applies to ansi-term as well, which just looks weird. So I'll turn it off there too.
 #+BEGIN_SRC emacs-lisp
     (add-hook 'term-mode-hook
 	      (lambda () (setq show-trailing-whitespace nil)))
@@ -306,15 +280,13 @@ text editing based modes.
 #+END_SRC
 
 *** Diminish
-Use diminish so that use-package can hide modes from the mode line when
-we ask it to.
+Use diminish so that use-package can hide modes from the mode line when we ask it to.
 #+BEGIN_SRC emacs-lisp
 (use-package diminish)
 #+END_SRC
 
 *** Undo Tree
-Emacs has a powerful, but confusing, undo model. Undo tree makes it
-easier to use and lets you get back pretty much anything you've done.
+Emacs has a powerful, but confusing, undo model. Undo tree makes it easier to use and lets you get back pretty much anything you've done.
 #+BEGIN_SRC emacs-lisp
 (use-package undo-tree
   :diminish
@@ -325,8 +297,7 @@ easier to use and lets you get back pretty much anything you've done.
 #+END_SRC
 
 *** Theme
-I like a dark editor, and base16-brewer is what I've got used
-previously. But now I'm trying a vscode dark theme.
+I like a dark editor, and base16-brewer is what I've got used previously. But now I'm trying a vscode dark theme.
 #+BEGIN_SRC emacs-lisp
     ;; (use-package base16-theme
     ;;     :ensure t
@@ -338,21 +309,21 @@ previously. But now I'm trying a vscode dark theme.
 #+END_SRC
 
 *** Fonts
-A matter of personal opinion, but a modern mono-spaced font makes
-emacs look a lot better. I'm currently trying +[[https://github.com/microsoft/cascadia-code][Cascadia Code]], which can
-be installed on debian with =sudo apt install fonts-cascadia-code=+
-Roboto Mono Light and Fira Code.
+A matter of personal opinion, but a modern mono-spaced font makes emacs look a lot better. I'm currently trying [[https://github.com/microsoft/cascadia-code][Cascadia Code]], which can be installed on debian with =sudo apt install fonts-cascadia-code=.
 
-I'm setting Roboto Light for the variable pitch font and Fira Code for
-fixed-pitch (i.e. monospace)
+I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pitch (i.e. monospace)
 
 #+BEGIN_SRC emacs-lisp
-  (set-face-attribute 'default nil :font "Cascadia Code 14")
-  (set-face-attribute 'fixed-pitch nil :font "Cascadia Code 14")
-  (set-face-attribute 'variable-pitch nil :font "Roboto Light 16")
+  ;; (defvar gp/fixed-width-font "Cascadia Code 14")
+  (defvar gp/fixed-width-font "Fira Code 13")
+  (defvar gp/variable-width-font "Roboto Light 15")
+
+  (set-face-attribute 'default nil :font gp/fixed-width-font)
+  (set-face-attribute 'fixed-pitch nil :font gp/fixed-width-font)
+  (set-face-attribute 'variable-pitch nil :font gp/variable-width-font)
 
   (dolist (face '(default fixed-pitch))
-    (set-face-attribute `,face nil :font "Cascadia Code 14"))
+    (set-face-attribute `,face nil :font gp/fixed-width-font))
 
   ;;(add-to-list 'default-frame-alist '(font . "Roboto Mono Light 14"))
   ;;(set-fontset-font "fontset-default"  '(#x2600 . #x26ff) "Fira Code 16")
@@ -365,8 +336,7 @@ fixed-pitch (i.e. monospace)
 *** Which key
 [[https://github.com/justbur/emacs-which-key][Which-key]] enables discoverability of available commands.
 
-If you ever want to just explore the available keybindings, then try
-=M-x which-key-show-top-level= or =M-x which-key-show-major-mode=
+If you ever want to just explore the available keybindings, then try =M-x which-key-show-top-level= or =M-x which-key-show-major-mode=
 
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
@@ -379,7 +349,8 @@ If you ever want to just explore the available keybindings, then try
 #+BEGIN_SRC emacs-lisp
   (use-package org
     :pin org ;; use version from orgmode.org/elpa instead of gnu.
-    :hook (org-mode . variable-pitch-mode) ;; enable a mix of proportional and fixed width fonts.
+    :hook ((org-mode . visual-line-mode)
+	   (org-mode . variable-pitch-mode)) ;; enable a mix of proportional and fixed width fonts.
     :custom
     (org-src-tab-acts-natively t)
     (org-src-fontify-natively t) ;; native src block fontification
@@ -392,14 +363,32 @@ If you ever want to just explore the available keybindings, then try
     :after org)
 #+END_SRC
 
-To make org mode look a bit nicer, I like to use the org-bullets
-package to replace headline markers with Unicode bullets.
+Let's make org-mode have dyanmic wrapping, and center it in the frame so that it works a bit more like a typical word processor.
+
+For this, I make use of [[https://elpa.gnu.org/packages/adaptive-wrap.html][adaptive-wrap]], [[https://www.emacswiki.org/emacs/VisualLineMode][visual-line-mode]], [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]] and [[https://github.com/mpwang/perfect-margin][perfect-margin]], then text behaves as if you'd used M-q but without actually adding line breaks to the source text.
+#+BEGIN_SRC emacs-lisp
+  (use-package adaptive-wrap
+    :hook (org-mode . adaptive-wrap-prefix-mode))
+
+  (use-package visual-fill-column
+    :hook (visual-line-mode . visual-fill-column-mode)
+    :custom
+    (visual-fill-column-width 80))
+
+  ;; centre the org-mode area in the frame.
+  (use-package perfect-margin
+    :hook (org-mode . perfect-margin-mode)
+    :custom
+    (perfect-margin-visible-width 80))
+#+END_SRC
+
+To make org mode look a bit nicer, I like to use the org-bullets package to replace headline markers with Unicode bullets.
 #+begin_src emacs-lisp
   (use-package org-bullets
   :hook (org-mode . org-bullets-mode))
 #+end_src
 
-In order for variable-pitch-mode to work properyl, I need to set fixed pitch fonts for various org faces:
+In order for variable-pitch-mode to work properly, I need to set fixed pitch fonts for various org faces:
 
 #+begin_src emacs-lisp
   (custom-theme-set-faces
@@ -443,13 +432,13 @@ sudo apt install sqlite3
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle no
-  (use-package org-roam
-    :init (setq org-roam-directory "~/Documents/Dropbox/org-roam")
-    :after org
-    :hook (org-mode . org-roam-mode)
-    :commands (org-roam-buffer-toggle-display
-	       org-roam-find-file
-	       org-roam-graph))
+  ;; (use-package org-roam
+  ;;   :init (setq org-roam-directory "~/Documents/Dropbox/org-roam")
+  ;;   :after org
+  ;;   :hook (org-mode . org-roam-mode)
+  ;;   :commands (org-roam-buffer-toggle-display
+  ;; 	     org-roam-find-file
+  ;; 	     org-roam-graph))
 #+END_SRC
 
 I'm telling org roam where to store my notes (my dropbox folder so
