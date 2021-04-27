@@ -591,7 +591,14 @@ Got to have those sweet code-completion popups, courtesy of [[https://company-mo
 			  `(lambda () (interactive) (company-complete-number ,x))))
 	    (number-sequence 0 9)))
     :init
+    (setq company-tooltip-minimum-width 10)
     (global-company-mode))
+#+END_SRC
+I've had issues with company popups being ragged when I'm using a proportional font. So I'm using [[https://github.com/tumashu/company-posframe/][company-posframe]] to enable child frames instead.
+#+BEGIN_SRC emacs-lisp
+  (use-package company-posframe
+    :init
+    (company-posframe-mode 1))
 #+END_SRC
 ** Parentheses
 I find it invaluable to have parentheses matching enabled.
