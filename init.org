@@ -1,138 +1,179 @@
+# -*- eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t); -*-
+
 #+TITLE: Emacs Literate Configuration
 #+AUTHOR: Giles Paterson
 #+PROPERTY: header-args :tangle yes
 
-* Configuration
 :PROPERTIES:
 :VISIBILITY: children
 :END:
 
-** Table of Contents :TOC_3_gh:
-- [[#configuration][Configuration]]
-  - [[#about-this-file][About this file]]
-    - [[#automatically-tangle][Automatically Tangle]]
-    - [[#visibility-settings][Visibility Settings]]
-    - [[#table-of-contents][Table of Contents]]
+* Table of Contexts :TOC_3_gh:
+- [[#about-this-file][About this file]]
+  - [[#tangle-on-save][Tangle on Save]]
+  - [[#visibility-settings][Visibility Settings]]
+  - [[#table-of-contents][Table of Contents]]
+- [[#early-init][Early Init]]
+- [[#general-emacs-settings][General Emacs Settings]]
+  - [[#use-package][Use-Package]]
+  - [[#todo-garbage-collection-again][TODO: Garbage Collection (again)]]
   - [[#personal-information][Personal Information]]
-  - [[#package-management][Package Management]]
-    - [[#sources][Sources]]
-    - [[#use-package][Use-Package]]
-  - [[#editor-configuration][Editor Configuration]]
-    - [[#fix-defaults][Fix defaults]]
-    - [[#disable-use-of-the-customize-file][Disable use of the customize file]]
-    - [[#disable-backup-files][Disable backup files]]
-    - [[#utf-8-all-the-things][UTF-8 all the things!]]
-    - [[#a-function-to-set-the-framesize-for-streaming][A function to set the framesize for streaming]]
-    - [[#set-initial-window-frame-size][Set initial window (frame) size]]
-    - [[#unbind-the-pesky-sleep-key][Unbind the pesky sleep key]]
-    - [[#use-y-or-n-instead-of-yes-or-no][Use 'y' or 'n' instead of 'yes' or 'no']]
-    - [[#enable-recentf-mode-recent-files][Enable recentf mode (recent-files)]]
-    - [[#enable-overwriting-selected-text][Enable overwriting selected text]]
-    - [[#disable-audible-bell-use-visual-instead][Disable audible bell, use visual instead]]
-    - [[#remove-toolbar][Remove toolbar]]
-    - [[#column-numbering-in-mode-line][Column numbering in mode line]]
-    - [[#show-trailing-white-space][Show trailing white space]]
-    - [[#highlight-current-line][Highlight current line]]
-    - [[#diminish][Diminish]]
-    - [[#undo-tree][Undo Tree]]
-    - [[#theme][Theme]]
-    - [[#fonts][Fonts]]
-  - [[#convenience-enhancements][Convenience Enhancements]]
-    - [[#which-key][Which key]]
-  - [[#org-mode][Org Mode]]
-    - [[#toc-org][Toc-org]]
+  - [[#fix-defaults][Fix defaults]]
+  - [[#disable-use-of-the-customize-file][Disable use of the customize file]]
+  - [[#disable-backup-files][Disable backup files]]
+  - [[#utf-8-all-the-things][UTF-8 all the things!]]
+  - [[#unbind-the-pesky-sleep-key][Unbind the pesky sleep key]]
+  - [[#use-y-or-n-instead-of-yes-or-no][Use 'y' or 'n' instead of 'yes' or 'no']]
+  - [[#a-function-to-set-the-framesize-for-streaming][A function to set the framesize for streaming]]
+  - [[#enable-overwriting-selected-text][Enable overwriting selected text]]
+  - [[#disable-audible-bell-use-visual-instead][Disable audible bell, use visual instead]]
+  - [[#show-trailing-white-space][Show trailing white space]]
+  - [[#highlight-current-line][Highlight current line]]
+  - [[#diminish][Diminish]]
+  - [[#undo-tree][Undo Tree]]
+  - [[#theme][Theme]]
+  - [[#fonts][Fonts]]
+  - [[#which-key][Which key]]
+- [[#org-mode][Org Mode]]
+  - [[#toc-org][Toc-org]]
   - [[#org-roam][Org Roam]]
-  - [[#markdown][Markdown]]
-  - [[#git-stuff][Git stuff]]
-  - [[#completion-framework][Completion Framework]]
-    - [[#ivy][Ivy]]
-    - [[#counsel][Counsel]]
-    - [[#ivy-rich][Ivy-Rich]]
-    - [[#swiper][Swiper]]
-  - [[#projectile][Projectile]]
-    - [[#counsel-projectile-org-capture][counsel-projectile-org-capture]]
-  - [[#codetext-completion-company-mode][Code/Text Completion (company-mode)]]
-  - [[#parentheses][Parentheses]]
-  - [[#line-numbers][Line numbers]]
-  - [[#development-languages][Development languages]]
+- [[#markdown][Markdown]]
+- [[#completion-framework][Completion Framework]]
+  - [[#ivy][Ivy]]
+  - [[#counsel][Counsel]]
+  - [[#ivy-rich][Ivy-Rich]]
+  - [[#swiper][Swiper]]
+- [[#git-stuff][Git stuff]]
+- [[#projectile][Projectile]]
+  - [[#counsel-projectile-org-capture][counsel-projectile-org-capture]]
+- [[#codetext-completion-company-mode][Code/Text Completion (company-mode)]]
+- [[#parentheses][Parentheses]]
+- [[#line-numbers][Line numbers]]
+- [[#development-languages][Development languages]]
   - [[#treemacs][Treemacs]]
   - [[#javascriptweb-development-lsp][Javascript/web development (lsp?)]]
-  - [[#yaml][Yaml]]
-  - [[#org-mode-live-preview][Org mode live preview?]]
+- [[#yaml][Yaml]]
 
-** About this file
-This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]]. I've also taken inspiration from https://blog.sumtypeofway.com/posts/emacs-config.html.
+* About this file
+This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]]. I've also taken inspiration from https://blog.sumtypeofway.com/posts/emacs-config.html and https://assortedarray.com/posts/my-init-org-setup/.
 
 This is a literate configuration, meaning that it's an org file with embedded code blocks that form the configuration for emacs. Having the code blocks in an org file allows me to document everything with the code it relates to.
 
-*** Automatically Tangle
-First there is a property defined on the file:
+** Tangle on Save
+   Rather than using a stub init.el that calls =org-babel-load-file= on startup, I'm using a hook to tangle this file when I save. This means that I only have one configuration file, and hopefully startup will be quicker too.
 
-#+BEGIN_SRC emacs-lisp :tangle no
-header-args :tangle yes
+   I'm using a file variable, added with =M-x add-file-local-variable-prop-line=, to set the eval hook in the first line of this file.
+
+   #+begin_src emacs-lisp :tangle no
+     eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t);
+   #+end_src
+
+   Alternatively, the file can be manually tangled with =M-x org-babel-tangle= or =C-c C-v t=.
+
+** Visibility Settings
+ Next we have a property defined on the [[Configuration][Configuration]] heading that defines the visibility that tells org to show it's direct children on startup. This way a clean outline of all sub headings under Configuration is shown each time this file is opened in org-mode.
+
+** Table of Contents
+ Finally, there is a [[Table of Contents][Table of Contents]] heading that includes the tag: =:TOC_3_gh:=. This tells an org-mode package =toc-org= to generate a table of contents under this heading that has a max depth of 3 and is created using Github-style hrefs. This table of contents is updated everytime the file is saved and makes for a functional table of contents that works properly directly on github.
+
+* Early Init
+  Emacs 27 introduced the =early-init.el= file that is loaded very early in the startup process. It's intended for customizing how the package system is initialized, so let's do our package config there:
+
+  #+begin_src emacs-lisp :tangle early-init.el
+    ;;; early-init.el -*- lexical-binding: t; eval: (view-mode -1); -*-
+    (require 'package)
+    (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+  #+end_src
+
+  Taking inspiration from [[https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-does-doom-start-up-so-quickly][doom-emacs]], I'm going to bump the garbage collection threshold up during startup to help speed things up. Then we reset it after startup.
+   #+begin_src emacs-lisp :tangle early-init.el
+     (defvar gp/gc-cons-threshold 16777216) ;; 16mb
+     (setq gc-cons-threshold most-positive-fixnum
+	   gc-cons-percentage 0.6)
+     (add-hook 'emacs-startup-hook
+	       (lambda ()
+		 (setq gc-cons-threshold gp/gc-cons-threshold
+		       gc-cons-percentage 0.1)))
+
+   #+end_src
+
+   Disable the tool-bar
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+  (tool-bar-mode -1)
 #+END_SRC
 
-This tells emacs to automatically tangle (include) all code blocks in this file when generating the code for the config, unless the code block explicitly includes =:tangle no= as the above code block does.
+* General Emacs Settings
+  Make elisp in this file have proper scoping. [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][This Emacswiki article explains it well.]]
 
-*** Visibility Settings
-Next we have a property defined on the [[Configuration][Configuration]] heading that defines the visibility that tells org to show it's direct children on startup. This way a clean outline of all sub headings under Configuration is shown each time this file is opened in org-mode.
+  I also enable =view-mode=, to make the tangled file read-only, as a reminder that it is auto-generated and shouldn't be manually edited.
 
-*** Table of Contents
-Finally, there is a [[Table of Contents][Table of Contents]] heading that includes the tag: =:TOC_3_gh:=. This tells an org-mode package =toc-org= to generate a table of contents under this heading that has a max depth of 3 and is created using Github-style hrefs. This table of contents is updated everytime the file is saved and makes for a functional table of contents that works properly directly on github.
+#+begin_src emacs-lisp :comments no
+;;; init.el -*- lexical-binding: t ; eval: (view-mode -1); -*-
+#+end_src
 
+** Use-Package
+   I like to use [[https://github.com/jwiegley/use-package][use-package]] to keep things tidy and speedy on startup, so this makes sure it's available. I set it to defer loading packages unless told otherwise, this speeds up initialisation.
+
+ #+begin_src emacs-lisp
+   (unless (package-installed-p 'use-package)
+     (package-refresh-contents)
+     (package-install 'use-package))
+   (setq use-package-always-ensure t
+	 use-package-ensure-all t
+	 use-package-always-defer t)
+   (require 'use-package)
+   (require 'use-package-ensure)
+ #+end_src
+
+ I like to make sure all my packages are up to date, so I use auto-package-update.
+ #+begin_src emacs-lisp
+   (use-package auto-package-update
+     :custom
+     (auto-package-update-delete-old-versions t)
+     :init
+     (auto-package-update-maybe))
+ #+end_src
+
+** TODO: Garbage Collection (again)
+   Increase the garbage collection thresholds when using the minibuffer, and return to normal afterwards.
+
+ #+begin_src emacs-lisp
+   ;; ;; max memory available for gc when opening minibuffer
+   ;; (defun gp/defer-garbage-collection-h ()
+   ;;   (setq gc-cons-threshold most-positive-fixnum))
+
+   ;; (defun gp/restore-garbage-collection-h ()
+   ;;   ;; Defer it so that commands launched immediately after will enjoy the
+   ;;   ;; benefits.
+   ;;   (run-at-time
+   ;;    1 nil (lambda () (setq gc-cons-threshold gp/gc-cons-threshold))))
+
+   ;; (add-hook 'minibuffer-setup-hook #'gp/defer-garbage-collection-h)
+   ;; (add-hook 'minibuffer-exit-hook #'gp/restore-garbage-collection-h)
+ #+end_src
 ** Personal Information
-This is me
+    This is me
+ #+begin_src emacs-lisp
+ (setq user-full-name "Giles Paterson"
+       user-mail-address "giles@vurt.uk")
+ #+end_src
 
-#+BEGIN_SRC emacs-lisp
-(setq user-full-name "Giles Paterson"
-      user-mail-address "giles@vurt.uk")
-#+END_SRC
 
-** Package Management
-*** Sources
+** Fix defaults
+ Reset some emacs defaults that date from prehistoric times
 
-Initially I defined the package sources here, but because we use org in the init.el, the built-in org version would always get used, rather than the version from orgmode.org. This caused issues with incompatible versions. To avoid that, all the package archive configuration has been moved to [[./init.el]]
+ #+BEGIN_SRC emacs-lisp
+   (setq inhibit-startup-screen t)      ;; No need for a startup screen
+   (setq initial-scratch-message nil)   ;; or to tell me what the scratch buffer is
+   (setq inhibit-startup-echo-area-message t)
+   (setq inhibit-startup-message t)
+   (setq sentence-end-double-space nil) ;; Who the hell does this in 2021?
+   (setq mark-even-if-inactive nil)     ;; Fix undo in command affecting the mark.
+   (setq kill-whole-line t)             ;; Let C-k delete the whole line.
+ #+END_SRC
 
-*** Use-Package
-
-I like to use [[https://github.com/jwiegley/use-package][use-package]] to keep things tidy and speedy on startup, so this makes sure it's available. I set it to defer loading packages unless told otherwise, this speeds up initialisation.
-
-#+BEGIN_SRC emacs-lisp
-  (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
-    (package-install 'use-package))
-  (setq use-package-always-ensure t
-	use-package-ensure-all t
-	use-package-always-defer t)
-  (require 'use-package)
-  (require 'use-package-ensure)
-#+END_SRC
-
-I like to make sure all my packages are up to date, so I use auto-package-update.
-#+BEGIN_SRC emacs-lisp
-  (use-package auto-package-update
-    :custom
-    (auto-package-update-delete-old-versions t)
-    :init
-    (auto-package-update-maybe))
-#+END_SRC
-
-** Editor Configuration
-
-*** Fix defaults
-Reset some emacs defaults that date from prehistoric times
-
-#+BEGIN_SRC emacs-lisp
-  (setq inhibit-startup-screen t)      ;; No need for a startup screen
-  (setq initial-scratch-message nil)   ;; or to tell me what the scratch buffer is
-  (setq inhibit-startup-echo-area-message t)
-  (setq inhibit-startup-message t)
-  (setq sentence-end-double-space nil) ;; Who the hell does this in 2021?
-  (setq mark-even-if-inactive nil)     ;; Fix undo in command affecting the mark.
-  (setq kill-whole-line t)             ;; Let C-k delete the whole line.
-#+END_SRC
-
-*** Disable use of the customize file
+** Disable use of the customize file
     I find this annoying, as it's all too easy to override something by accident with the customize functionality, then your emacs init doesn't work. You can't get rid of it completely, but you can point it at a random file every time.
 
 #+BEGIN_SRC emacs-lisp
@@ -140,16 +181,17 @@ Reset some emacs defaults that date from prehistoric times
   (setq custom-safe-themes t)
 #+END_SRC
 
-*** Disable backup files
-I've never found emacs backup files to be particularly useful
+** Disable backup files
+    I've never found emacs backup files to be particularly useful
 #+BEGIN_SRC emacs-lisp
   (setq make-backup-files nil)
   (setq auto-save-default nil)
   (setq create-lockfiles nil)
 #+END_SRC
 
-*** UTF-8 all the things!
-utf-8 should be the default for everything.
+** UTF-8 all the things!
+    utf-8 should be the default for everything.
+
 #+BEGIN_SRC emacs-lisp
   (set-charset-priority 'unicode)
   (setq locale-coding-system 'utf-8)
@@ -160,62 +202,52 @@ utf-8 should be the default for everything.
   (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
 #+END_SRC
 
-*** A function to set the framesize for streaming
-Sometimes I want to show emacs via OBS Studio, which I have set to 1280x720p. A frame size of 109x31 fits perfectly for me. Here's a function I can call to switch to toggle between that frame size and my normal one, when I need it.
-#+BEGIN_SRC emacs-lisp
-  (defvar gp/frame-normal-width 110)
-  (defvar gp/frame-normal-height 58)
-  (defvar gp/frame-streaming-width 109)
-  (defvar gp/frame-streaming-height 31)
-  (defvar gp/is-streaming-size nil)
-
-  (defun gp/frame-size-streaming ()
-    "Sets the frame size so it's suitable for streaming via OBS at 720p"
-    (interactive)
-    (set-frame-width (selected-frame) gp/frame-streaming-width)
-    (set-frame-height (selected-frame) gp/frame-streaming-height)
-    (setq gp/is-streaming-size t))
-
-  (defun gp/frame-size-normal ()
-    "Sets the frame size to my default values"
-    (interactive)
-    (set-frame-width (selected-frame) gp/frame-normal-width)
-    (set-frame-height (selected-frame) gp/frame-normal-height)
-    (setq gp/is-streaming-size nil))
-
-  (defun gp/streaming-toggle ()
-    "Toggles between streaming and normal frame sizes"
-    (interactive)
-    (if (eq gp/is-streaming-size nil)
-      (gp/frame-size-streaming)
-    ; else
-    (gp/frame-size-normal)))
-
-  (gp/frame-size-normal)
-#+END_SRC
-
-*** Set initial window (frame) size
-Re-use the values for my normal frame width & height.
-#+BEGIN_SRC emacs-lisp
-  (setq initial-frame-alist
-      '(
-	(width . gp/frame-normal-width) ; character
-	(height . gp/frame-normal-height) ; lines
-	))
-#+END_SRC
-
-*** Unbind the pesky sleep key
+** Unbind the pesky sleep key
 #+BEGIN_SRC emacs-lisp
   (global-unset-key [(control z)])
   (global-unset-key [(control x)(control z)])
 #+END_SRC
 
-*** Use 'y' or 'n' instead of 'yes' or 'no'
+** Use 'y' or 'n' instead of 'yes' or 'no'
 #+BEGIN_SRC emacs-lisp
   (fset 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
 
-*** Enable recentf mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
+** A function to set the framesize for streaming
+ Sometimes I want to show emacs via OBS Studio, which I have set to 1280x720p. A frame size of 109x31 fits perfectly for me. Here's a function I can call to switch to toggle between that frame size and my normal one, when I need it.
+ #+BEGIN_SRC emacs-lisp
+   (defvar gp/frame-normal-width 110)
+   (defvar gp/frame-normal-height 58)
+   (defvar gp/frame-streaming-width 109)
+   (defvar gp/frame-streaming-height 31)
+   (defvar gp/is-streaming-size nil)
+
+   (defun gp/frame-size-streaming ()
+     "Sets the frame size so it's suitable for streaming via OBS at 720p"
+     (interactive)
+     (set-frame-width (selected-frame) gp/frame-streaming-width)
+     (set-frame-height (selected-frame) gp/frame-streaming-height)
+     (setq gp/is-streaming-size t))
+
+   (defun gp/frame-size-normal ()
+     "Sets the frame size to my default values"
+     (interactive)
+     (set-frame-width (selected-frame) gp/frame-normal-width)
+     (set-frame-height (selected-frame) gp/frame-normal-height)
+     (setq gp/is-streaming-size nil))
+
+   (defun gp/streaming-toggle ()
+     "Toggles between streaming and normal frame sizes"
+     (interactive)
+     (if (eq gp/is-streaming-size nil)
+       (gp/frame-size-streaming)
+     ; else
+     (gp/frame-size-normal)))
+
+   (gp/frame-size-normal)
+ #+END_SRC
+
+ * Enable recentf mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
 Recentf is useful to re-open a file you worked on recently, but it's good to set some limits on it. Also, ignore any package files from elpa, as they make it less than useful.
 #+BEGIN_SRC emacs-lisp
   (require 'recentf)
@@ -228,51 +260,41 @@ Recentf is useful to re-open a file you worked on recently, but it's good to set
 
 I've replaced the recentf-open-files keybinding with counsel-recentf instead.
 
-*** Enable overwriting selected text
+** Enable overwriting selected text
 #+BEGIN_SRC emacs-lisp
   (delete-selection-mode t)
 #+END_SRC
 
-*** Disable audible bell, use visual instead
+** Disable audible bell, use visual instead
 #+BEGIN_SRC emacs-lisp
   (setq ring-bell-function 'ignore)
   (setq visible-bell t)
 #+END_SRC
 
-*** Remove toolbar
-#+BEGIN_SRC emacs-lisp
-  (tool-bar-mode -1)
-#+END_SRC
+** Show trailing white space
+   Show white space at the ends of line, to avoid embarassment when comitting something. Then delete them with M-x delete-trailing-whitespace
+  #+BEGIN_SRC emacs-lisp
+    (setq-default show-trailing-whitespace t)
+  #+END_SRC
 
-*** Column numbering in mode line
-#+BEGIN_SRC emacs-lisp
-(column-number-mode 1)
-#+END_SRC
+   actually, just delete them automatically when we save.
+  #+BEGIN_SRC emacs-lisp
+    (add-hook 'before-save-hook #'delete-trailing-whitespace)
+  #+END_SRC
 
-*** Show trailing white space
-Show white space at the ends of line, to avoid embarassment when comitting something. Then delete them with M-x delete-trailing-whitespace
-#+BEGIN_SRC emacs-lisp
-  (setq-default show-trailing-whitespace t)
-#+END_SRC
+   Show whitespace also applies to the minibuffer by default, which rather spoils ivy and counsel output. Let's disable that behaviour:
+  #+BEGIN_SRC emacs-lisp
+    (add-hook 'minibuffer-setup-hook
+	      (lambda () (setq-local show-trailing-whitespace nil)))
+  #+END_SRC
 
-actually, just delete them automatically when we save.
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'before-save-hook #'delete-trailing-whitespace)
-#+END_SRC
-
-Show whitespace also applies to the minibuffer by default, which rather spoils ivy and counsel output. Let's disable that behaviour:
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'minibuffer-setup-hook
-	    (lambda () (setq-local show-trailing-whitespace nil)))
-#+END_SRC
-
-Also, it applies to ansi-term as well, which just looks weird. So I'll turn it off there too.
-#+BEGIN_SRC emacs-lisp
+   Also, it applies to ansi-term as well, which just looks weird. So I'll turn it off there too.
+  #+BEGIN_SRC emacs-lisp
     (add-hook 'term-mode-hook
 	      (lambda () (setq show-trailing-whitespace nil)))
-#+END_SRC
+  #+END_SRC
 
-*** Highlight current line
+** Highlight current line
 This is useful in many situations, so enable it for programming and
 text editing based modes.
 #+BEGIN_SRC emacs-lisp
@@ -280,14 +302,13 @@ text editing based modes.
   (add-hook 'prog-mode-hook #'hl-line-mode)
   (add-hook 'text-mode-hook #'hl-line-mode)
 #+END_SRC
-
-*** Diminish
+** Diminish
 Use diminish so that use-package can hide modes from the mode line when we ask it to.
 #+BEGIN_SRC emacs-lisp
 (use-package diminish)
 #+END_SRC
 
-*** Undo Tree
+** Undo Tree
 Emacs has a powerful, but confusing, undo model. Undo tree makes it easier to use and lets you get back pretty much anything you've done.
 #+BEGIN_SRC emacs-lisp
 (use-package undo-tree
@@ -298,7 +319,7 @@ Emacs has a powerful, but confusing, undo model. Undo tree makes it easier to us
   (unbind-key "M-_" undo-tree-map))
 #+END_SRC
 
-*** Theme
+** Theme
 I like a dark editor, and base16-brewer is what I've got used previously. But now I'm trying a vscode dark theme.
 #+BEGIN_SRC emacs-lisp
     ;; (use-package base16-theme
@@ -310,7 +331,7 @@ I like a dark editor, and base16-brewer is what I've got used previously. But no
 ;;(load-theme 'base16-vscode-dark t)
 #+END_SRC
 
-*** Fonts
+** Fonts
 A matter of personal opinion, but a modern mono-spaced font makes emacs look a lot better. I'm currently trying [[https://github.com/microsoft/cascadia-code][Cascadia Code]], which can be installed on debian with =sudo apt install fonts-cascadia-code=.
 
 I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pitch (i.e. monospace)
@@ -333,11 +354,10 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
   (setq x-underline-at-descent-line t)
 #+END_SRC
 
-** Convenience Enhancements
-*** Which key
-[[https://github.com/justbur/emacs-which-key][Which-key]] enables discoverability of available commands.
+** Which key
+   [[https://github.com/justbur/emacs-which-key][Which-key]] enables discoverability of available commands.
 
-If you ever want to just explore the available keybindings, then try =M-x which-key-show-top-level= or =M-x which-key-show-major-mode=
+   If you ever want to just explore the available keybindings, then try =M-x which-key-show-top-level= or =M-x which-key-show-major-mode=
 
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
@@ -346,7 +366,7 @@ If you ever want to just explore the available keybindings, then try =M-x which-
     (which-key-setup-side-window-bottom))
 #+END_SRC
 
-** Org Mode
+* Org Mode
 #+BEGIN_SRC emacs-lisp
   (use-package org
     :pin org ;; use version from orgmode.org/elpa instead of gnu.
@@ -419,17 +439,17 @@ In order for variable-pitch-mode to work properly, I need to set fixed pitch fon
      '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
 #+end_src
 
-*** Toc-org
-Install the =toc-org= package after org mode is loaded. This enables
-automatic generation of up to date tables of contents.
+** Toc-org
+ Install the =toc-org= package after org mode is loaded. This enables
+ automatic generation of up to date tables of contents.
 
-#+BEGIN_SRC emacs-lisp
-  (use-package toc-org
-    :ensure t
-    :after org
-    :hook (org-mode . toc-org-mode))
+ #+BEGIN_SRC emacs-lisp
+   (use-package toc-org
+     :ensure t
+     :after org
+     :hook (org-mode . toc-org-mode))
 
-#+END_SRC
+ #+END_SRC
 ** Org Roam
 I'm not using org roam at the moment so this config is disabled.
 
@@ -458,7 +478,7 @@ sudo apt install sqlite3
 I'm telling org roam where to store my notes (my dropbox folder so
 they get synched between machines).
 
-** Markdown
+* Markdown
 Sometimes I need to edit markdown, so here's how to configure [[https://github.com/jrblevin/markdown-mode][markdown-mode]].
 For README.md files, use github flavoured markdown, otherwise use normal markdown mode.
 
@@ -469,7 +489,60 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
 	   ("\\.markdown\\'" . markdown-mode)))
 #+END_SRC
 
-** Git stuff
+* Completion Framework
+
+** Ivy
+   I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, instead of Helm.
+
+ #+BEGIN_SRC emacs-lisp
+   (use-package ivy
+     :diminish ivy-mode
+     :custom
+     (ivy-height 30)
+     (ivy-use-virtual-buffers t)
+     (ivy-use-selectable-prompt t)
+     (ivy-count-format "(%d/%d) ")
+     :config
+     (ivy-mode 1))
+ #+END_SRC
+
+  I'll start with a minimal config - just setting the options recommended in the getting started section of the documentation.
+
+** Counsel
+   Similarly, for Counsel, I'll just enable counsel-mode to default to using counsel.
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel
+    :diminish counsel-mode
+    :bind (("C-x C-r" . counsel-recentf))
+    :config
+    (counsel-mode 1))
+
+  (use-package counsel-projectile)
+#+END_SRC
+
+** Ivy-Rich
+   Ivy-rich enables prettifying the ivy output
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy-rich
+    :hook ((ivy-mode counsel-mode) . ivy-rich-mode)
+    :custom
+    (ivy-virtual-abbreviate 'abbreviate)
+    (ivy-rich-path-style 'abbrev)
+    :config
+    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
+#+END_SRC
+
+** Swiper
+   And finally, swiper for searching. I bind it to C-s so that I use it instead of i-search.
+
+   I'm now binding swiper-thing-at-point to C-s since I'm usually searching for th thing I'm looking at.
+#+BEGIN_SRC emacs-lisp
+  (use-package swiper
+    :commands (swiper swiper-all)
+    :bind ("C-s" . 'swiper-thing-at-point))
+#+END_SRC
+
+* Git stuff
 Magit is a great interface to git (although the [[https://magit.vc/manual/magit/][documentation]] is quite dense).
 #+BEGIN_SRC emacs-lisp
   (use-package magit
@@ -490,65 +563,11 @@ I like to have a visual git status in the gutter/fringe, for that I use [[https:
 #+END_SRC
 Dimish the mode so that it doesn't clutter up our mode line/status bar.
 
-The update-intervalk config is to enable live updating (every 2 seconds of idle time).
+The update-interval config is to enable live updating (every 2 seconds of idle time).
 
 I enable it globally because I use git for many different files, not just code.
 
-** Completion Framework
-
-*** Ivy
-I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, instead of Helm.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package ivy
-    :diminish ivy-mode
-    :custom
-    (ivy-height 30)
-    (ivy-use-virtual-buffers t)
-    (ivy-use-selectable-prompt t)
-    (ivy-count-format "(%d/%d) ")
-    :config
-    (ivy-mode 1))
-#+END_SRC
-
-I'll start with a minimal config - just setting the options recommended in the getting started section of the documentation.
-
-*** Counsel
-Similarly, for Counsel, I'll just enable counsel-mode to default to using counsel.
-#+BEGIN_SRC emacs-lisp
-  (use-package counsel
-    :diminish counsel-mode
-    :bind (("C-x C-r" . counsel-recentf))
-    :config
-    (counsel-mode 1))
-
-  (use-package counsel-projectile)
-#+END_SRC
-
-*** Ivy-Rich
-Ivy-rich enables prettifying the ivy output
-#+BEGIN_SRC emacs-lisp
-  (use-package ivy-rich
-    :hook ((ivy-mode counsel-mode) . ivy-rich-mode)
-    :custom
-    (ivy-virtual-abbreviate 'abbreviate)
-    (ivy-rich-path-style 'abbrev)
-    :config
-    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
-#+END_SRC
-
-*** Swiper
-And finally, swiper for searching. I bind it to C-s so that I use it instead of i-search.
-
-I'm now binding swiper-thing-at-point to C-s since I'm usually
-searching for th thing I'm looking at.
-#+BEGIN_SRC emacs-lisp
-  (use-package swiper
-    :commands (swiper swiper-all)
-    :bind ("C-s" . 'swiper-thing-at-point))
-#+END_SRC
-
-** Projectile
+* Projectile
 [[https://github.com/bbatsov/projectile][Projectile]] is handy for interacting with projects, and it can integrate with Helm or Ivy nicely.
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
@@ -571,9 +590,10 @@ And since I'm currently using Ivy & Counsel, I'll include the [[https://github.c
     :config
     (counsel-projectile-mode))
 #+END_SRC
-*** TODO [[https://github.com/ericdanan/counsel-projectile#setting-counsel-projectile-org-capture-templates][counsel-projectile-org-capture]]
 
-** Code/Text Completion (company-mode)
+** TODO [[https://github.com/ericdanan/counsel-projectile#setting-counsel-projectile-org-capture-templates][counsel-projectile-org-capture]]
+
+* Code/Text Completion (company-mode)
 Got to have those sweet code-completion popups, courtesy of [[https://company-mode.github.io/][company-mode]].
 #+BEGIN_SRC emacs-lisp
   (use-package company
@@ -601,7 +621,8 @@ I've had issues with company popups being ragged when I'm using a proportional f
     :init
     (company-posframe-mode 1))
 #+END_SRC
-** Parentheses
+
+* Parentheses
 I find it invaluable to have parentheses matching enabled.
 #+BEGIN_SRC emacs-lisp
   (show-paren-mode t)
@@ -612,7 +633,7 @@ And I like the visual delimitation of colour. Rainbow-delimiters adds that.
   :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 
-** Line numbers
+* Line numbers
 I want line numbers on all code editing buffers. Since they should all
 derive from prog-mode, I'll set line numbers there and hope for the
 best. The alternative is to enable global line numbers then turn it
@@ -621,12 +642,12 @@ off in other modes, but that seems messier to me.
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 #+END_SRC
 
-** Development languages
-I'm going to try lsp-mode again, for languages it supports.
+* Development languages
+  I'm going to try lsp-mode again, for languages it supports.
 
-Emacs 27 with lsp-mode is super fast and really good to use.
+  Emacs 27 with lsp-mode is super fast and really good to use.
 
-Here's the core lsp-configuration:
+  Here's the core lsp-configuration:
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
     :hook (
@@ -648,20 +669,14 @@ Here's the core lsp-configuration:
 #+END_SRC
 I've changed the default prefix from "s-l" to "C-l".
 
-According to the [[https://emacs-lsp.github.io/lsp-mode/page/performance/][lsp-mode documentation]], a few things should be
-tweaked for maximum performance.
+According to the [[https://emacs-lsp.github.io/lsp-mode/page/performance/][lsp-mode documentation]], a few things should be tweaked for maximum performance.
 
-The default setting is too low for lsp-mode's needs due to the fact
-that client/server communication generates a lot of
-memory/garbage. I've taken the easy approach of just setting this to
-100mb in the lsp-mode init section above.
+The default setting is too low for lsp-mode's needs due to the fact that client/server communication generates a lot of memory/garbage. I've taken the easy approach of just setting this to 100mb in the lsp-mode init section above.
 #+BEGIN_SRC emacs-lisp :tangle no
 (setq gc-cons-threshold 100000000)
 #+END_SRC
 
-Similarly the the amount of data which Emacs reads from the process
-needs increasing. The emacs default (4k) is too low considering that
-some of the language server responses are in 800k - 3M range.
+Similarly the the amount of data which Emacs reads from the process needs increasing. The emacs default (4k) is too low considering that some of the language server responses are in 800k - 3M range.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
@@ -673,16 +688,15 @@ Turn on ivy integration for lsp:
     :after (ivy lsp-mode))
 #+END_SRC
 
-Sometimes I want an IDE style tree view, so lets enable treemacs and lsp-treemacs
+** Treemacs
+
+   Sometimes I want an IDE style tree view, so lets enable treemacs and lsp-treemacs
 #+BEGIN_SRC emacs-lisp
     (use-package lsp-treemacs
       :after (treemacs lsp-mode))
 #+END_SRC
 
-** Treemacs
-Treemacs provides a very configurable tree-view. I'm going to see how
-I get on with it, so I've just grabbed a basic config from the
-[[https://github.com/Alexander-Miller/treemacs][treemacs documentation]].
+Treemacs provides a very configurable tree-view. I'm going to see how I get on with it, so I've just grabbed a basic config from the [[https://github.com/Alexander-Miller/treemacs][treemacs documentation]].
 
 C-x t t should toggle the treeview, and I'll see how I get on with that.
 
@@ -720,25 +734,9 @@ And since we're also using projectile, let's enable treemacs integration
 #+END_SRC
 
 ** Javascript/web development (lsp?)
-There are several ways to configure javascript & typescript
-support. I'm going with web-mode since it can handle template-based
-development (react, vue etc.) along with raw js & ts files.
+   There are several ways to configure javascript & typescript support. I'm going with web-mode since it can handle template-based development (react, vue etc.) along with raw js & ts files.
 
 #+BEGIN_SRC emacs-lisp
-  ;; (use-package tide
-  ;;   :hook (
-  ;;        (web-mode . setup-tide-mode)
-  ;; 	 )
-  ;;   :config
-  ;;   (defun setup-tide-mode ()
-  ;;     (interactive)
-  ;;     (tide-setup)
-  ;;     (eldoc-mode +1)
-  ;;     (company-mode +1)
-  ;;     (local-set-key [f1] 'tide-documentation-at-point))
-  ;;   (setq company-tooltip-align-annotations t)
-  ;;   (setq tide-sort-completions-by-kind t)
-  ;; )
   (use-package web-mode
     :ensure t
     :mode (("\\.js\\'" . web-mode)
@@ -760,20 +758,16 @@ development (react, vue etc.) along with raw js & ts files.
     )
 #+END_SRC
 
-You will need to install the [[https://github.com/sourcegraph/javascript-typescript-langserver][javascript-typescript-langserver]] for lsp
-to work with javascript.
+You will need to install the [[https://github.com/sourcegraph/javascript-typescript-langserver][javascript-typescript-langserver]] for lsp to work with javascript.
 #+BEGIN_SRC sh
 npm i -g javascript-typescript-langserver
 #+END_SRC
 
-Alternatively, this could be installed as a docker container, and then
-you could avoid installing npm/node on your local machine. I'll have
-to give that another go sometime.
+Alternatively, this could be installed as a docker container, and then you could avoid installing npm/node on your local machine. I'll have to give that another go sometime.
 
-** Yaml
+* Yaml
 #+BEGIN_SRC emacs-lisp
   (use-package yaml-mode
     :ensure t
     :mode ("\\.ya?ml\\'" . yaml-mode))
 #+END_SRC
-** TODO Org mode live preview?

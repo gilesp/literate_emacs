@@ -20,5 +20,28 @@ auto-save-list/
 # Recent files list
 recentf
 
+# Cache files
+.cache/
+
+# Lsp session files
+.lsp-session*
+
+# transient
+transient/
+
+# tramp connection history
+tramp
+
+# projectile
+projectile-bookmarks.eld
+
+# sessions
+session.*
+
+# package update infor
+.last-package-update-day
+
 # Tangled
 emacs.el
+init.el
+early-init.el
