@@ -110,10 +110,11 @@ I like to use [[https://github.com/jwiegley/use-package][use-package]] to keep t
 
 I like to make sure all my packages are up to date, so I use auto-package-update.
 #+BEGIN_SRC emacs-lisp
-(use-package auto-package-update
-  :init
-  (auto-package-update-maybe)
-  (setq auto-package-update-delete-old-versions t))
+  (use-package auto-package-update
+    :custom
+    (auto-package-update-delete-old-versions t)
+    :init
+    (auto-package-update-maybe))
 #+END_SRC
 
 ** Editor Configuration
@@ -382,7 +383,7 @@ For this, I make use of [[https://elpa.gnu.org/packages/adaptive-wrap.html][adap
     (perfect-margin-visible-width 80)
     :init
     (defcustom perfect-margin-ignore-regexps
-      '("^minibuf" "^[*]" "^magit")
+      '("^minibuf" "^[*]" "^magit" "^COMMIT_")
       "List of strings to determine if window is ignored.
   Each string is used as regular expression to match the window buffer name."
       :group 'perfect-margin)
@@ -510,7 +511,7 @@ I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, inst
     (ivy-mode 1))
 #+END_SRC
 
-I'll start with a minimal config - just setting the options recommended int the getting started section of the documentation.
+I'll start with a minimal config - just setting the options recommended in the getting started section of the documentation.
 
 *** Counsel
 Similarly, for Counsel, I'll just enable counsel-mode to default to using counsel.
