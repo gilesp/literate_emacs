@@ -99,9 +99,9 @@ This is a literate configuration, meaning that it's an org file with embedded co
    #+end_src
 
    Disable the tool-bar
-#+BEGIN_SRC emacs-lisp :tangle early-init.el
+#+begin_src emacs-lisp :tangle early-init.el
   (tool-bar-mode -1)
-#+END_SRC
+#+end_src
 
 * General Emacs Settings
   Make elisp in this file have proper scoping. [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][This Emacswiki article explains it well.]]
@@ -163,7 +163,7 @@ This is a literate configuration, meaning that it's an org file with embedded co
 ** Fix defaults
  Reset some emacs defaults that date from prehistoric times
 
- #+BEGIN_SRC emacs-lisp
+ #+begin_src emacs-lisp
    (setq inhibit-startup-screen t)      ;; No need for a startup screen
    (setq initial-scratch-message nil)   ;; or to tell me what the scratch buffer is
    (setq inhibit-startup-echo-area-message t)
@@ -171,28 +171,28 @@ This is a literate configuration, meaning that it's an org file with embedded co
    (setq sentence-end-double-space nil) ;; Who the hell does this in 2021?
    (setq mark-even-if-inactive nil)     ;; Fix undo in command affecting the mark.
    (setq kill-whole-line t)             ;; Let C-k delete the whole line.
- #+END_SRC
+ #+end_src
 
 ** Disable use of the customize file
     I find this annoying, as it's all too easy to override something by accident with the customize functionality, then your emacs init doesn't work. You can't get rid of it completely, but you can point it at a random file every time.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (setq custom-file (make-temp-file ""))
   (setq custom-safe-themes t)
-#+END_SRC
+#+end_src
 
 ** Disable backup files
     I've never found emacs backup files to be particularly useful
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (setq make-backup-files nil)
   (setq auto-save-default nil)
   (setq create-lockfiles nil)
-#+END_SRC
+#+end_src
 
 ** UTF-8 all the things!
     utf-8 should be the default for everything.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (set-charset-priority 'unicode)
   (setq locale-coding-system 'utf-8)
   (set-terminal-coding-system 'utf-8)
@@ -200,22 +200,22 @@ This is a literate configuration, meaning that it's an org file with embedded co
   (set-selection-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
   (setq default-process-coding-system '(utf-8-unix . utf-8-unix))
-#+END_SRC
+#+end_src
 
 ** Unbind the pesky sleep key
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (global-unset-key [(control z)])
   (global-unset-key [(control x)(control z)])
-#+END_SRC
+#+end_src
 
 ** Use 'y' or 'n' instead of 'yes' or 'no'
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (fset 'yes-or-no-p 'y-or-n-p)
-#+END_SRC
+#+end_src
 
 ** A function to set the framesize for streaming
  Sometimes I want to show emacs via OBS Studio, which I have set to 1280x720p. A frame size of 109x31 fits perfectly for me. Here's a function I can call to switch to toggle between that frame size and my normal one, when I need it.
- #+BEGIN_SRC emacs-lisp
+ #+begin_src emacs-lisp
    (defvar gp/frame-normal-width 110)
    (defvar gp/frame-normal-height 58)
    (defvar gp/frame-streaming-width 109)
@@ -245,83 +245,83 @@ This is a literate configuration, meaning that it's an org file with embedded co
      (gp/frame-size-normal)))
 
    (gp/frame-size-normal)
- #+END_SRC
+ #+end_src
 
  * Enable recentf mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
 Recentf is useful to re-open a file you worked on recently, but it's good to set some limits on it. Also, ignore any package files from elpa, as they make it less than useful.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (require 'recentf)
   (recentf-mode 1)
   (setq recentf-max-menu-items 50)
   (setq recentf-max-saved-items 250)
   ;; (global-set-key "\C-x\ \C-r" 'recentf-open-files)
   (add-to-list 'recentf-exclude "\\elpa")
-#+END_SRC
+#+end_src
 
 I've replaced the recentf-open-files keybinding with counsel-recentf instead.
 
 ** Enable overwriting selected text
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (delete-selection-mode t)
-#+END_SRC
+#+end_src
 
 ** Disable audible bell, use visual instead
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (setq ring-bell-function 'ignore)
   (setq visible-bell t)
-#+END_SRC
+#+end_src
 
 ** Show trailing white space
    Show white space at the ends of line, to avoid embarassment when comitting something. Then delete them with M-x delete-trailing-whitespace
-  #+BEGIN_SRC emacs-lisp
+  #+begin_src emacs-lisp
     (setq-default show-trailing-whitespace t)
-  #+END_SRC
+  #+end_src
 
    actually, just delete them automatically when we save.
-  #+BEGIN_SRC emacs-lisp
+  #+begin_src emacs-lisp
     (add-hook 'before-save-hook #'delete-trailing-whitespace)
-  #+END_SRC
+  #+end_src
 
    Show whitespace also applies to the minibuffer by default, which rather spoils ivy and counsel output. Let's disable that behaviour:
-  #+BEGIN_SRC emacs-lisp
+  #+begin_src emacs-lisp
     (add-hook 'minibuffer-setup-hook
 	      (lambda () (setq-local show-trailing-whitespace nil)))
-  #+END_SRC
+  #+end_src
 
    Also, it applies to ansi-term as well, which just looks weird. So I'll turn it off there too.
-  #+BEGIN_SRC emacs-lisp
+  #+begin_src emacs-lisp
     (add-hook 'term-mode-hook
 	      (lambda () (setq show-trailing-whitespace nil)))
-  #+END_SRC
+  #+end_src
 
 ** Highlight current line
 This is useful in many situations, so enable it for programming and
 text editing based modes.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (require 'hl-line)
   (add-hook 'prog-mode-hook #'hl-line-mode)
   (add-hook 'text-mode-hook #'hl-line-mode)
-#+END_SRC
+#+end_src
 ** Diminish
 Use diminish so that use-package can hide modes from the mode line when we ask it to.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package diminish)
-#+END_SRC
+#+end_src
 
 ** Undo Tree
 Emacs has a powerful, but confusing, undo model. Undo tree makes it easier to use and lets you get back pretty much anything you've done.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package undo-tree
   :diminish
   :bind (("C-c _" . undo-tree-visualize))
   :config
   (global-undo-tree-mode +1)
   (unbind-key "M-_" undo-tree-map))
-#+END_SRC
+#+end_src
 
 ** Theme
 I like a dark editor, and base16-brewer is what I've got used previously. But now I'm trying a vscode dark theme.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
     ;; (use-package base16-theme
     ;;     :ensure t
     ;;     :config
@@ -329,14 +329,14 @@ I like a dark editor, and base16-brewer is what I've got used previously. But no
 (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes"))
 (load-theme 'vscode-dark-plus t)
 ;;(load-theme 'base16-vscode-dark t)
-#+END_SRC
+#+end_src
 
 ** Fonts
 A matter of personal opinion, but a modern mono-spaced font makes emacs look a lot better. I'm currently trying [[https://github.com/microsoft/cascadia-code][Cascadia Code]], which can be installed on debian with =sudo apt install fonts-cascadia-code=.
 
 I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pitch (i.e. monospace)
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;; (defvar gp/fixed-width-font "Cascadia Code 14")
   (defvar gp/fixed-width-font "Fira Code 13")
   (defvar gp/variable-width-font "Roboto Light 15")
@@ -352,22 +352,22 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
   ;;(set-fontset-font "fontset-default"  '(#x2600 . #x26ff) "Fira Code 16")
   (setq-default line-spacing 0)
   (setq x-underline-at-descent-line t)
-#+END_SRC
+#+end_src
 
 ** Which key
    [[https://github.com/justbur/emacs-which-key][Which-key]] enables discoverability of available commands.
 
    If you ever want to just explore the available keybindings, then try =M-x which-key-show-top-level= or =M-x which-key-show-major-mode=
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package which-key
     :config
     (which-key-mode 1)
     (which-key-setup-side-window-bottom))
-#+END_SRC
+#+end_src
 
 * Org Mode
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package org
     :pin org ;; use version from orgmode.org/elpa instead of gnu.
     :hook ((org-mode . visual-line-mode)
@@ -382,12 +382,12 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
   (use-package org-plus-contrib
     :pin org
     :after org)
-#+END_SRC
+#+end_src
 
 Let's make org-mode have dyanmic wrapping, and center it in the frame so that it works a bit more like a typical word processor.
 
 For this, I make use of [[https://elpa.gnu.org/packages/adaptive-wrap.html][adaptive-wrap]], [[https://www.emacswiki.org/emacs/VisualLineMode][visual-line-mode]], [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]] and [[https://github.com/mpwang/perfect-margin][perfect-margin]], then text behaves as if you'd used M-q but without actually adding line breaks to the source text.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package adaptive-wrap
     :hook (org-mode . adaptive-wrap-prefix-mode))
 
@@ -414,7 +414,7 @@ For this, I make use of [[https://elpa.gnu.org/packages/adaptive-wrap.html][adap
   Each function is called with window as its sole arguemnt, returning a non-nil value indicate to ignore the window."
       :group 'perfect-margin)
     )
-#+END_SRC
+#+end_src
 
 To make org mode look a bit nicer, I like to use the org-bullets package to replace headline markers with Unicode bullets.
 #+begin_src emacs-lisp
@@ -443,13 +443,13 @@ In order for variable-pitch-mode to work properly, I need to set fixed pitch fon
  Install the =toc-org= package after org mode is loaded. This enables
  automatic generation of up to date tables of contents.
 
- #+BEGIN_SRC emacs-lisp
+ #+begin_src emacs-lisp
    (use-package toc-org
      :ensure t
      :after org
      :hook (org-mode . toc-org-mode))
 
- #+END_SRC
+ #+end_src
 ** Org Roam
 I'm not using org roam at the moment so this config is disabled.
 
@@ -461,11 +461,11 @@ it hanging around.
 +notes in the past, only more organised ;-)+
 
 +org-roam requires sqlite3 to be installed, so if it isn't, run this:+
-#+BEGIN_SRC sh
+#+begin_src sh :tangle no
 sudo apt install sqlite3
-#+END_SRC
+#+end_src
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
   ;; (use-package org-roam
   ;;   :init (setq org-roam-directory "~/Documents/Dropbox/org-roam")
   ;;   :after org
@@ -473,7 +473,7 @@ sudo apt install sqlite3
   ;;   :commands (org-roam-buffer-toggle-display
   ;; 	     org-roam-find-file
   ;; 	     org-roam-graph))
-#+END_SRC
+#+end_src
 
 I'm telling org roam where to store my notes (my dropbox folder so
 they get synched between machines).
@@ -482,19 +482,19 @@ they get synched between machines).
 Sometimes I need to edit markdown, so here's how to configure [[https://github.com/jrblevin/markdown-mode][markdown-mode]].
 For README.md files, use github flavoured markdown, otherwise use normal markdown mode.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package markdown-mode
     :mode (("README\\.md\\'" . gfm-mode)
 	   ("\\.md\\'" . markdown-mode)
 	   ("\\.markdown\\'" . markdown-mode)))
-#+END_SRC
+#+end_src
 
 * Completion Framework
 
 ** Ivy
    I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, instead of Helm.
 
- #+BEGIN_SRC emacs-lisp
+ #+begin_src emacs-lisp
    (use-package ivy
      :diminish ivy-mode
      :custom
@@ -504,13 +504,13 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
      (ivy-count-format "(%d/%d) ")
      :config
      (ivy-mode 1))
- #+END_SRC
+ #+end_src
 
   I'll start with a minimal config - just setting the options recommended in the getting started section of the documentation.
 
 ** Counsel
    Similarly, for Counsel, I'll just enable counsel-mode to default to using counsel.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package counsel
     :diminish counsel-mode
     :bind (("C-x C-r" . counsel-recentf))
@@ -518,11 +518,11 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
     (counsel-mode 1))
 
   (use-package counsel-projectile)
-#+END_SRC
+#+end_src
 
 ** Ivy-Rich
    Ivy-rich enables prettifying the ivy output
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package ivy-rich
     :hook ((ivy-mode counsel-mode) . ivy-rich-mode)
     :custom
@@ -530,29 +530,29 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
     (ivy-rich-path-style 'abbrev)
     :config
     (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
-#+END_SRC
+#+end_src
 
 ** Swiper
    And finally, swiper for searching. I bind it to C-s so that I use it instead of i-search.
 
    I'm now binding swiper-thing-at-point to C-s since I'm usually searching for th thing I'm looking at.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package swiper
     :commands (swiper swiper-all)
     :bind ("C-s" . 'swiper-thing-at-point))
-#+END_SRC
+#+end_src
 
 * Git stuff
 Magit is a great interface to git (although the [[https://magit.vc/manual/magit/][documentation]] is quite dense).
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package magit
     :bind (("C-x g" . magit-status)
 	   ("C-x M-g" . magit-dispatch-popup)))
-#+END_SRC
+#+end_src
 Apart from the keybindings, I don't need to make any config changes.
 
 I like to have a visual git status in the gutter/fringe, for that I use [[https://github.com/emacsorphanage/git-gutter][git-gutter.el]]
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package git-gutter
     :diminish git-gutter-mode
     :init
@@ -560,7 +560,7 @@ I like to have a visual git status in the gutter/fringe, for that I use [[https:
      '(git-gutter:update-interval 2))
     :config
     (global-git-gutter-mode +1))
-#+END_SRC
+#+end_src
 Dimish the mode so that it doesn't clutter up our mode line/status bar.
 
 The update-interval config is to enable live updating (every 2 seconds of idle time).
@@ -569,7 +569,7 @@ I enable it globally because I use git for many different files, not just code.
 
 * Projectile
 [[https://github.com/bbatsov/projectile][Projectile]] is handy for interacting with projects, and it can integrate with Helm or Ivy nicely.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package projectile
     :demand
     :bind (:map projectile-mode-map
@@ -580,22 +580,22 @@ I enable it globally because I use git for many different files, not just code.
     :config
     (add-to-list 'projectile-globally-ignored-files "node-modules")
     (projectile-mode))
-#+END_SRC
+#+end_src
 
 And since I'm currently using Ivy & Counsel, I'll include the [[https://github.com/ericdanan/counsel-projectile][counsel-projectile]] integration too.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package counsel-projectile
     :demand
     :config
     (counsel-projectile-mode))
-#+END_SRC
+#+end_src
 
 ** TODO [[https://github.com/ericdanan/counsel-projectile#setting-counsel-projectile-org-capture-templates][counsel-projectile-org-capture]]
 
 * Code/Text Completion (company-mode)
 Got to have those sweet code-completion popups, courtesy of [[https://company-mode.github.io/][company-mode]].
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package company
     :diminish
     :bind (("C-." . #'company-complete))
@@ -614,33 +614,33 @@ Got to have those sweet code-completion popups, courtesy of [[https://company-mo
     :init
     (setq company-tooltip-minimum-width 10)
     (global-company-mode))
-#+END_SRC
+#+end_src
 I've had issues with company popups being ragged when I'm using a proportional font. So I'm using [[https://github.com/tumashu/company-posframe/][company-posframe]] to enable child frames instead.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package company-posframe
     :init
     (company-posframe-mode 1))
-#+END_SRC
+#+end_src
 
 * Parentheses
 I find it invaluable to have parentheses matching enabled.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (show-paren-mode t)
-#+END_SRC
+#+end_src
 And I like the visual delimitation of colour. Rainbow-delimiters adds that.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
-#+END_SRC
+#+end_src
 
 * Line numbers
 I want line numbers on all code editing buffers. Since they should all
 derive from prog-mode, I'll set line numbers there and hope for the
 best. The alternative is to enable global line numbers then turn it
 off in other modes, but that seems messier to me.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-#+END_SRC
+#+end_src
 
 * Development languages
   I'm going to try lsp-mode again, for languages it supports.
@@ -648,7 +648,7 @@ off in other modes, but that seems messier to me.
   Emacs 27 with lsp-mode is super fast and really good to use.
 
   Here's the core lsp-configuration:
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package lsp-mode
     :hook (
 	   ;; bind lsp to the development modes I'm interested in.
@@ -666,41 +666,41 @@ off in other modes, but that seems messier to me.
 
   (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
 
-#+END_SRC
+#+end_src
 I've changed the default prefix from "s-l" to "C-l".
 
 According to the [[https://emacs-lsp.github.io/lsp-mode/page/performance/][lsp-mode documentation]], a few things should be tweaked for maximum performance.
 
 The default setting is too low for lsp-mode's needs due to the fact that client/server communication generates a lot of memory/garbage. I've taken the easy approach of just setting this to 100mb in the lsp-mode init section above.
-#+BEGIN_SRC emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
 (setq gc-cons-threshold 100000000)
-#+END_SRC
+#+end_src
 
 Similarly the the amount of data which Emacs reads from the process needs increasing. The emacs default (4k) is too low considering that some of the language server responses are in 800k - 3M range.
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
-#+END_SRC
+#+end_src
 
 Turn on ivy integration for lsp:
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package lsp-ivy
     :after (ivy lsp-mode))
-#+END_SRC
+#+end_src
 
 ** Treemacs
 
    Sometimes I want an IDE style tree view, so lets enable treemacs and lsp-treemacs
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
     (use-package lsp-treemacs
       :after (treemacs lsp-mode))
-#+END_SRC
+#+end_src
 
 Treemacs provides a very configurable tree-view. I'm going to see how I get on with it, so I've just grabbed a basic config from the [[https://github.com/Alexander-Miller/treemacs][treemacs documentation]].
 
 C-x t t should toggle the treeview, and I'll see how I get on with that.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package treemacs
   :ensure t
   :defer t
@@ -724,19 +724,19 @@ C-x t t should toggle the treeview, and I'll see how I get on with that.
         ("C-x t B"   . treemacs-bookmark)
         ("C-x t C-t" . treemacs-find-file)
         ("C-x t M-t" . treemacs-find-tag)))
-#+END_SRC
+#+end_src
 
 And since we're also using projectile, let's enable treemacs integration
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package treemacs-projectile
     :after (treemacs projectile)
     :ensure t)
-#+END_SRC
+#+end_src
 
 ** Javascript/web development (lsp?)
    There are several ways to configure javascript & typescript support. I'm going with web-mode since it can handle template-based development (react, vue etc.) along with raw js & ts files.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package web-mode
     :ensure t
     :mode (("\\.js\\'" . web-mode)
@@ -756,18 +756,18 @@ And since we're also using projectile, let's enable treemacs integration
     (setq web-mode-content-types-alist
 	  '(("jsx" . "\\.js[x]?\\'")))
     )
-#+END_SRC
+#+end_src
 
 You will need to install the [[https://github.com/sourcegraph/javascript-typescript-langserver][javascript-typescript-langserver]] for lsp to work with javascript.
-#+BEGIN_SRC sh
+#+begin_src sh :tangle no
 npm i -g javascript-typescript-langserver
-#+END_SRC
+#+end_src
 
 Alternatively, this could be installed as a docker container, and then you could avoid installing npm/node on your local machine. I'll have to give that another go sometime.
 
 * Yaml
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package yaml-mode
     :ensure t
     :mode ("\\.ya?ml\\'" . yaml-mode))
-#+END_SRC
+#+end_src
