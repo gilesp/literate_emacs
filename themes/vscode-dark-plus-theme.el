@@ -1,10 +1,10 @@
 ;;; vscode-dark-plus-theme.el --- Default Visual Studio Code Dark+ theme -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2020 Ian Y.E. Pan
+;; Copyright (C) 2020-2021 Ian Y.E. Pan
 
 ;; Author: Ian Y.E. Pan
 ;; URL: https://github.com/ianpan870102/vscode-dark-plus-emacs-theme
-;; Version: 1.5.0
+;; Version: 0.0.0
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -43,8 +43,24 @@
 ;;; Code:
 
 (deftheme vscode-dark-plus)
+
+(defcustom vscode-dark-plus-box-org-todo t
+  "Set box around TODO items in org-mode"
+  :type 'boolean
+  :group 'dark-plus)
+
+(defcustom vscode-dark-plus-scale-org-faces t
+  "Scale headlines and other org faces"
+  :type 'boolean
+  :group 'dark-plus)
+
+(defcustom vscode-dark-plus-invert-hl-todo t
+  "Set (:invert-video t) on hl-todo face"
+  :type 'boolean
+  :group 'dark-plus)
+
 (let ((class '((class color) (min-colors 89)))
-      (fg0               "#AEAFAD")
+      (fg0               "#aeafad")
       (fg1               "#d4d4d4") ; default fg
       (fg2               "#e8e8e8")
       (fg3               "#f4f4f4")
@@ -52,49 +68,49 @@
       (bg0               "#111111")
       (bg1               "#1e1e1e") ; default bg
       (bg2               "#252526")
-      (bg3               "#313131")
+      (bg3               "#333333")
       (bg4               "#4b474c")
-      (bg-hl             "#124f7b")
-      (vc-r              "#A41511")
-      (vc-g              "#4A7F00")
-      (vc-b              "#207FA1")
-      (key2              "#CE9178")
+      (bg-hl             "#264f78")
+      (vc-r              "#a41511")
+      (vc-g              "#4a7f00")
+      (vc-b              "#207fa1")
+      (key2              "#ce9178")
       (key3              "#9cdcfe")
       (accent            "#ffffff")
       (numeric           "#b5cea8")
       (mode-line-bg      "#007acc")
-      (mode-line-bg-dark "#005Aa3")
+      (mode-line-bg-dark "#005aa3")
       (line-num          "#838383")
-      (builtin           "#C586C0")
+      (builtin           "#c586c0")
       (keyword           "#569cd6")
-      (const             "#4EC9B0")
-      (comment           "#6A9955")
-      (doc               "#888888")
-      (func              "#DCDCAA")
-      (str               "#CE9178")
+      (const             "#4ec9b0")
+      (comment           "#6a9955")
+      (doc               "#ce9178")
+      (doc-alt           "#888888")
+      (func              "#dcdcaa")
+      (str               "#ce9178")
       (type              "#4ec9b0")
       (var               "#9cdcfe")
       (warning           "#f16969")
 
       ;; standardized palette
-      (ms-yellow         "#DCDCAA")
-      (ms-bluegreen      "#4EC9B0")
-      (ms-magenta        "#C586C0")
-      (ms-lightblue      "#9CDCFE")
-      (ms-orange         "#CE9178")
-      (ms-lightorange    "#D7BA7D")
+      (ms-yellow         "#dcdcaa")
+      (ms-bluegreen      "#4ec9b0")
+      (ms-magenta        "#c586c0")
+      (ms-orange         "#ce9178")
+      (ms-lightorange    "#d7ba7d")
       (ms-red            "#d16969")
-      (ms-green          "#6A9955")
+      (ms-green          "#6a9955")
       (ms-blue           "#569cd6")
       (ms-lightred       "#f19999")
       (ms-lightgreen     "#b5cea8")
-      ;; (ms-lightblue      "#9CDCFE")
+      (ms-lightblue      "#9cdcfe")
       (ms-red-bg         "#551b1e")
-      (ms-blue-bg        "#040E3F")
       (ms-green-bg       "#39422a")
+      (ms-blue-bg        "#040e3f")
       (ms-red-bghl       "#74140f")
-      (ms-blue-bghl      "#141E4F")
-      (ms-green-bghl     "#4b5332"))
+      (ms-green-bghl     "#4b5332")
+      (ms-blue-bghl      "#141e4f"))
 
   (custom-theme-set-faces
    'vscode-dark-plus
@@ -115,25 +131,26 @@
    `(font-lock-regexp-grouping-backslash      ((,class (:foreground ,ms-lightorange))))
    `(font-lock-regexp-grouping-construct      ((,class (:foreground ,ms-lightorange))))
 
-   `(region                                   ((,class (:background ,bg-hl))))
-   `(highlight                                ((,class (:foreground ,bg3 :background ,fg3))))
+   `(region                                   ((,class (:background ,bg-hl :distant-foreground ,fg0 :extend nil))))
+   `(secondary-selection                      ((,class (:inherit region))))
+   `(highlight                                ((,class (:foreground "#4db2ff" :underline t)))) ; link hover
    `(hl-line                                  ((,class (:background ,bg3))))
-   `(fringe                                   ((,class (:background ,bg1 :foreground ,fg4))))
+   `(fringe                                   ((,class (:background nil :foreground ,fg4))))
    `(cursor                                   ((,class (:background ,fg1))))
    `(show-paren-match-face                    ((,class (:background ,warning))))
    `(show-paren-match                         ((t (:foreground ,fg3 :background ,bg4 :bold t))))
    `(show-paren-mismatch                      ((t (:background ,warning))))
-   `(isearch                                  ((,class (:bold nil :foreground ,accent :background ,bg4))))
-   `(vertical-border                          ((,class (:foreground ,bg3))))
+   `(isearch                                  ((,class (:background "#613214"))))
+   `(vertical-border                          ((,class (:foreground "black"))))
    `(minibuffer-prompt                        ((,class (:foreground ,ms-bluegreen :weight normal))))
-   `(default-italic                           ((,class (:italic t))))
-   `(link                                     ((,class (:foreground ,const :underline t))))
+   `(link                                     ((,class (:foreground "#3794ff"))))
    `(error                                    ((,class (:foreground ,ms-orange))))
    `(warning                                  ((,class (:foreground ,ms-magenta))))
    `(success                                  ((,class (:foreground ,ms-bluegreen))))
    `(dired-directory                          ((t (:inherit (font-lock-keyword-face)))))
-   `(line-number                              ((,class (:foreground ,line-num :background nil))))
-   `(line-number-current-line                 ((,class (:foreground ,fg1 :background nil))))
+   `(line-number                              ((,class (:inherit default :foreground ,line-num))))
+   `(line-number-current-line                 ((,class (:inherit line-number))))
+   `(header-line                              ((,class (:inherit nil :foreground ,accent :background ,bg4 :box (:line-width -1)))))
 
    `(mode-line                                ((,class (:bold nil :foreground ,fg4 :background ,mode-line-bg))))
    `(mode-line-inactive                       ((,class (:bold nil :foreground ,fg1 :background ,mode-line-bg-dark))))
@@ -147,10 +164,11 @@
    `(company-tooltip                          ((t (:inherit default :background ,bg2))))
    `(company-tooltip-common                   ((t (:foreground ,ms-blue :bold t))))
    `(company-tooltip-selection                ((t (:background ,bg-hl))))
-   `(company-tooltip-annotation               ((t (:foreground ,doc)))) ; parameter hints etc.
+   `(company-tooltip-annotation               ((t (:foreground ,doc-alt)))) ; parameter hints etc.
+   `(company-template-field                   ((t (:inherit region))))
 
-   `(org-document-title                       ((,class (:foreground ,type :height 1.2 :bold t))))
-   `(org-level-1                              ((,class (:bold nil :foreground ,ms-bluegreen :height 1.1))))
+   `(org-level-1                              ((,class (:bold nil :foreground ,ms-bluegreen
+                                                              ,@(when vscode-dark-plus-scale-org-faces (list :height 1.1))))))
    `(org-level-2                              ((,class (:bold nil :foreground ,ms-lightblue))))
    `(org-level-3                              ((,class (:bold nil :foreground ,ms-blue))))
    `(org-level-4                              ((,class (:bold nil :foreground ,ms-bluegreen))))
@@ -163,20 +181,27 @@
    `(org-block                                ((,class (:foreground ,fg2 :background ,bg0 :extend t))))
    `(org-quote                                ((,class (:inherit org-block :slant italic))))
    `(org-verse                                ((,class (:inherit org-block :slant italic))))
-   `(org-todo                                 ((,class (:box (:line-width 1 :color ,ms-lightred) :foreground ,ms-lightred :bold nil))))
+   `(org-todo                                 ((,class (,@(when vscode-dark-plus-box-org-todo (list :box '(:line-width 1 :color ,ms-lightred)))
+                                                        :foreground ,ms-lightred :bold nil))))
    `(org-done                                 ((,class (:box (:line-width 1 :color ,ms-lightgreen) :foreground ,ms-lightgreen :bold nil ))))
    `(org-warning                              ((,class (:underline t :foreground ,warning))))
    `(org-agenda-structure                     ((,class (:weight normal :foreground ,fg3 :box (:color ,fg4) :background ,bg3))))
-   `(org-agenda-date                          ((,class (:foreground ,var :height 1.1 ))))
+   `(org-agenda-date                          ((,class (:foreground ,var ,@(when vscode-dark-plus-scale-org-faces (list :height 1.1))))))
    `(org-agenda-date-weekend                  ((,class (:weight normal :foreground ,fg4))))
-   `(org-agenda-date-today                    ((,class (:weight normal :foreground ,keyword :height 1.2))))
+   `(org-agenda-date-today                    ((,class (:weight normal :foreground ,keyword
+                                                                ,@(when vscode-dark-plus-scale-org-faces (list :height 1.2))))))
    `(org-agenda-done                          ((,class (:foreground ,bg4))))
    `(org-scheduled                            ((,class (:foreground ,type))))
-   `(org-scheduled-today                      ((,class (:foreground ,func :weight normal :height 1.2))))
+   `(org-scheduled-today                      ((,class (:foreground ,func :weight normal
+                                                                    ,@(when vscode-dark-plus-scale-org-faces (list :height 1.2))))))
    `(org-ellipsis                             ((,class (:foreground ,builtin))))
    `(org-verbatim                             ((,class (:foreground ,fg4))))
-   `(org-document-info-keyword                ((,class (:foreground ,ms-green))))
+   `(org-document-title                       ((,class (:foreground ,type :bold t
+                                                                    ,@(when vscode-dark-plus-scale-org-faces (list :height 1.2)))))) ; title
+   `(org-document-info                        ((,class (:foreground ,ms-yellow)))) ; author, date etc.
+   `(org-document-info-keyword                ((,class (:foreground ,ms-green))))  ; "#+Title", "#+Date" etc.
    `(org-sexp-date                            ((,class (:foreground ,fg4))))
+   `(org-table                                ((,class (:foreground ,fg2 :background ,bg3))))
 
    `(font-latex-bold-face                     ((,class (:foreground ,type))))
    `(font-latex-italic-face                   ((,class (:foreground ,key3 :italic t))))
@@ -230,7 +255,7 @@
 
    `(slime-repl-inputed-output-face           ((,class (:foreground ,type))))
    `(trailing-whitespace                      ((,class :foreground nil :background ,warning)))
-   `(lazy-highlight                           ((,class (:foreground ,fg2 :background ,bg3))))
+   `(lazy-highlight                           ((,class (:background "#613214"))))
 
    `(undo-tree-visualizer-current-face        ((,class :foreground ,builtin)))
    `(undo-tree-visualizer-default-face        ((,class :foreground ,fg2)))
@@ -315,6 +340,8 @@
    `(magit-signature-untrusted                ((t (:foreground ,ms-bluegreen))))
    `(magit-tag                                ((t (:foreground ,ms-yellow))))
 
+   `(git-commit-summary                       ((t (:inherit default)))) ; magit commit message face
+
    `(term                                     ((,class (:foreground ,fg1 :background ,bg1))))
    `(term-color-black                         ((,class (:foreground ,bg3 :background ,bg3))))
    `(term-color-blue                          ((,class (:foreground ,ms-blue :background ,func))))
@@ -327,7 +354,7 @@
 
    `(diredfl-autofile-name                    ((t (:foreground ,fg0))))
    `(diredfl-compressed-file-name             ((t (:foreground ,ms-yellow))))
-   `(diredfl-compressed-file-suffix           ((t (:foreground ,doc))))
+   `(diredfl-compressed-file-suffix           ((t (:foreground ,doc-alt))))
    `(diredfl-date-time                        ((t (:foreground ,ms-bluegreen))))
    `(diredfl-deletion                         ((t (:foreground ,ms-red :bold t))))
    `(diredfl-deletion-file-name               ((t (:foreground ,ms-red ))))
@@ -337,9 +364,9 @@
    `(diredfl-exec-priv                        ((t (:foreground ,ms-green))))
    `(diredfl-executable-tag                   ((t (:foreground ,ms-green))))
    `(diredfl-file-name                        ((t (:foreground ,fg1))))
-   `(diredfl-file-suffix                      ((t (:foreground ,doc))))
+   `(diredfl-file-suffix                      ((t (:foreground ,doc-alt))))
    `(diredfl-flag-mark                        ((t (:foreground ,ms-yellow :bold t))))
-   `(diredfl-ignored-file-name                ((t (:foreground ,doc))))
+   `(diredfl-ignored-file-name                ((t (:foreground ,doc-alt))))
    `(diredfl-link-priv                        ((t (:foreground ,ms-magenta))))
    `(diredfl-no-priv                          ((t (:foreground ,fg1))))
    `(diredfl-number                           ((t (:foreground ,ms-orange))))
@@ -455,7 +482,7 @@
    `(ivy-minibuffer-match-face-4              ((t (:inherit ivy-minibuffer-match-face-2))))
    `(ivy-minibuffer-match-highlight           ((t (:inherit ivy-current-match))))
    `(ivy-modified-buffer                      ((t (:inherit default :foreground ,var))))
-   `(ivy-virtual                              ((t (:inherit default :foreground ,doc))))
+   `(ivy-virtual                              ((t (:inherit default :foreground ,doc-alt))))
    `(ivy-posframe                             ((t (:background "#252526"))))
 
    `(counsel-key-binding                      ((t (:foreground ,var))))
@@ -477,26 +504,65 @@
    `(diff-hl-delete                           ((t (:background ,vc-r :foreground ,vc-r))))
    `(diff-hl-change                           ((t (:background ,vc-b :foreground ,vc-b))))
 
-   `(neo-dir-link-face                        ((t (:foreground "#cccccc" :family "Sans Serif"))))
-   `(neo-header-face                          ((t (:foreground "#cccccc" :family "Sans Serif"))))
-   `(neo-banner-face                          ((t (:foreground "#cccccc" :family "Sans Serif"))))
-   `(neo-root-dir-face                        ((t (:foreground "#cccccc" :family "Sans Serif"))))
-   `(neo-file-link-face                       ((t (:foreground "#aaaaaa" :family "Sans Serif"))))
-   `(neo-expand-btn-face                      ((t (:foreground "#aaaaaa"))))
+   `(neo-dir-link-face                        ((t (:foreground "#cccccc"))))
+   `(neo-header-face                          ((t (:foreground "#cccccc"))))
+   `(neo-banner-face                          ((t (:foreground "#cccccc"))))
+   `(neo-root-dir-face                        ((t (:foreground "#cccccc"))))
+   `(neo-file-link-face                       ((t (:foreground "#cccccc"))))
+   `(neo-expand-btn-face                      ((t (:foreground "#cccccc"))))
 
-   `(sml/global                               ((t (:foreground ,fg1 :weight normal))))
-   `(sml/filename                             ((t (:foreground ,fg1 :weight normal))))
-   `(sml/prefix                               ((t (:foreground ,fg1 :weight normal))))
-   `(sml/read-only                            ((t (:foreground ,fg1 :weight normal))))
-   `(sml/modes                                ((t (:foreground ,fg1 :weight normal))))
+   `(sml/global                               ((t (:foreground ,fg2 :weight normal))))
+   `(sml/filename                             ((t (:foreground ,fg2 :weight normal))))
+   `(sml/line-number                          ((t (:foreground ,fg2 :weight normal))))
+   `(sml/prefix                               ((t (:foreground ,fg2 :weight normal))))
+   `(sml/read-only                            ((t (:foreground ,fg2 :weight normal))))
+   `(sml/modes                                ((t (:foreground ,fg2 :weight normal))))
+   `(sml/modified                             ((t (:foreground ,accent :weight bold))))
+   `(sml/charging                             ((t (:foreground ,ms-green :weight normal))))
 
    `(evil-ex-substitute-matches               ((t (:foreground ,warning :weight normal :strike-through t))))
    `(evil-ex-substitute-replacement           ((t (:foreground ,ms-bluegreen :weight normal))))
 
-   `(hl-todo                                  ((t (:inverse-video t))))
+   `(hl-todo                                  ((t ,@(when vscode-dark-plus-invert-hl-todo (list :inverse-video t)))))
    `(highlight-numbers-number                 ((t (:foreground ,numeric))))
    `(highlight-operators-face                 ((t (:inherit default))))
-   `(highlight-symbol-face                    ((t (:background "#343a40"))))))
+   `(highlight-symbol-face                    ((t (:background "#343a40"))))
+
+   `(window-divider                           ((t (:foreground "gray40"))))
+   `(window-divider-last-pixel                ((t (:foreground "gray20"))))
+   `(window-divider-first-pixel               ((t (:foreground "gray60"))))
+
+   `(tree-sitter-hl-face:method.call          ((t (:inherit font-lock-function-name-face))))
+   `(tree-sitter-hl-face:function.call        ((t (:inherit font-lock-function-name-face))))
+   `(tree-sitter-hl-face:operator             ((t (:inherit default))))
+   `(tree-sitter-hl-face:type.builtin         ((t (:inherit font-lock-keyword-face))))
+   `(tree-sitter-hl-face:number               ((t (:inherit highlight-numbers-number))))
+   `(tree-sitter-hl-face:variable.special     ((t (:inherit font-lock-keyword-face))))
+   `(tree-sitter-hl-face:keyword              ((t (:foreground ,ms-magenta))))
+
+   `(lsp-ui-doc-background                    ((t (:background ,bg2))))
+
+   `(font-latex-bold-face                     ((t (:inherit bold))))
+   `(font-latex-italic-face                   ((t (:inherit italic))))
+   `(font-latex-math-face                     ((t (:foreground ,ms-blue))))
+   `(font-latex-sectioning-0-face             ((t (:foreground ,ms-blue))))
+   `(font-latex-sectioning-1-face             ((t (:foreground ,ms-magenta))))
+   `(font-latex-sectioning-2-face             ((t (:foreground ,ms-lightorange))))
+   `(font-latex-sectioning-3-face             ((t (:foreground ,ms-lightblue))))
+   `(font-latex-sectioning-4-face             ((t (:foreground ,ms-lightred))))
+   `(font-latex-sectioning-5-face             ((t (:foreground ,ms-lightgreen))))
+   `(font-latex-script-char-face              ((t (:foreground ,ms-blue))))
+   `(font-latex-string-face                   ((t (:inherit font-lock-string-face))))
+   `(font-latex-warning-face                  ((t (:inherit font-lock-warning-face))))
+   `(font-latex-verbatim-face                 ((t (:inherit org-verbatim))))
+   `(TeX-error-description-error              ((t (:inherit error :bold t))))
+   `(TeX-error-description-warning            ((t (:inherit warning :bold t))))
+   `(TeX-error-description-tex-said           ((t (:inherit success :bold t))))
+
+   `(tab-bar-tab-inactive                     ((t (:background "#2D2D2D" :foreground ,fg0))))
+   `(tab-bar-tab                              ((t (:background ,bg1 :foreground ,accent))))
+   `(tab-line                                 ((t (:background ,bg2))))
+   `(tab-bar                                  ((t (:background ,bg1))))))
 
 ;;;###autoload
 (when (and (boundp 'custom-theme-load-path) load-file-name)
