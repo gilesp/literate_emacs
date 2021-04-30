@@ -33,6 +33,7 @@
   - [[#highlight-current-line][Highlight current line]]
   - [[#undo-tree][Undo Tree]]
   - [[#theme][Theme]]
+    - [[#mode-line][Mode line]]
   - [[#fonts][Fonts]]
   - [[#which-key][Which key]]
 - [[#org-mode][Org Mode]]
@@ -331,6 +332,16 @@ I like a dark editor, and base16-brewer is what I've got used previously. But no
 
   ;; Do not set different heights for some org faces
   (setq vscode-dark-plus-scale-org-faces nil)
+#+end_src
+
+*** Mode line
+    I'm using doom-modeline as it looks nice and is pretty customisable. It depends on =all-the-icons= so you need to run =M-x all-the-icons-install-fonts= to make sure the fonts are installed.
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+    :ensure t
+    :custom
+    (column-number-mode t)
+    :init (doom-modeline-mode 1))
 #+end_src
 
 ** Fonts
