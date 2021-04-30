@@ -14,8 +14,10 @@
   - [[#visibility-settings][Visibility Settings]]
   - [[#table-of-contents][Table of Contents]]
 - [[#early-init][Early Init]]
+  - [[#disable-the-tool-bar-and-menu-bar][Disable the tool-bar and menu-bar]]
 - [[#general-emacs-settings][General Emacs Settings]]
   - [[#use-package][Use-Package]]
+  - [[#diminish][Diminish]]
   - [[#todo-garbage-collection-again][TODO: Garbage Collection (again)]]
   - [[#personal-information][Personal Information]]
   - [[#fix-defaults][Fix defaults]]
@@ -29,7 +31,6 @@
   - [[#disable-audible-bell-use-visual-instead][Disable audible bell, use visual instead]]
   - [[#show-trailing-white-space][Show trailing white space]]
   - [[#highlight-current-line][Highlight current line]]
-  - [[#diminish][Diminish]]
   - [[#undo-tree][Undo Tree]]
   - [[#theme][Theme]]
   - [[#fonts][Fonts]]
@@ -98,10 +99,11 @@ This is a literate configuration, meaning that it's an org file with embedded co
 
    #+end_src
 
-   Disable the tool-bar
-#+begin_src emacs-lisp :tangle early-init.el
-  (tool-bar-mode -1)
-#+end_src
+** Disable the tool-bar and menu-bar
+ #+begin_src emacs-lisp :tangle early-init.el
+   (tool-bar-mode -1)
+   (menu-bar-mode -1)
+ #+end_src
 
 * General Emacs Settings
   Make elisp in this file have proper scoping. [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][This Emacswiki article explains it well.]]
@@ -134,6 +136,11 @@ This is a literate configuration, meaning that it's an org file with embedded co
      :init
      (auto-package-update-maybe))
  #+end_src
+** Diminish
+Use diminish so that use-package can hide modes from the mode line when we ask it to.
+#+begin_src emacs-lisp
+(use-package diminish)
+#+end_src
 
 ** TODO: Garbage Collection (again)
    Increase the garbage collection thresholds when using the minibuffer, and return to normal afterwards.
@@ -302,11 +309,6 @@ text editing based modes.
   (add-hook 'prog-mode-hook #'hl-line-mode)
   (add-hook 'text-mode-hook #'hl-line-mode)
 #+end_src
-** Diminish
-Use diminish so that use-package can hide modes from the mode line when we ask it to.
-#+begin_src emacs-lisp
-(use-package diminish)
-#+end_src
 
 ** Undo Tree
 Emacs has a powerful, but confusing, undo model. Undo tree makes it easier to use and lets you get back pretty much anything you've done.
@@ -361,6 +363,7 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
 
 #+begin_src emacs-lisp
   (use-package which-key
+    :diminish
     :config
     (which-key-mode 1)
     (which-key-setup-side-window-bottom))
@@ -389,15 +392,18 @@ Let's make org-mode have dyanmic wrapping, and center it in the frame so that it
 For this, I make use of [[https://elpa.gnu.org/packages/adaptive-wrap.html][adaptive-wrap]], [[https://www.emacswiki.org/emacs/VisualLineMode][visual-line-mode]], [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]] and [[https://github.com/mpwang/perfect-margin][perfect-margin]], then text behaves as if you'd used M-q but without actually adding line breaks to the source text.
 #+begin_src emacs-lisp
   (use-package adaptive-wrap
+    :diminish adaptive-wrap-prefix-mode
     :hook (org-mode . adaptive-wrap-prefix-mode))
 
   (use-package visual-fill-column
+    :diminish
     :hook (visual-line-mode . visual-fill-column-mode)
     :custom
     (visual-fill-column-width 80))
 
   ;; centre the org-mode area in the frame.
   (use-package perfect-margin
+    :diminish
     :hook (org-mode . perfect-margin-mode)
     :custom
     (perfect-margin-visible-width 80)
@@ -419,7 +425,8 @@ For this, I make use of [[https://elpa.gnu.org/packages/adaptive-wrap.html][adap
 To make org mode look a bit nicer, I like to use the org-bullets package to replace headline markers with Unicode bullets.
 #+begin_src emacs-lisp
   (use-package org-bullets
-  :hook (org-mode . org-bullets-mode))
+    :diminish
+    :hook (org-mode . org-bullets-mode))
 #+end_src
 
 In order for variable-pitch-mode to work properly, I need to set fixed pitch fonts for various org faces:
@@ -445,6 +452,7 @@ In order for variable-pitch-mode to work properly, I need to set fixed pitch fon
 
  #+begin_src emacs-lisp
    (use-package toc-org
+     :diminish
      :ensure t
      :after org
      :hook (org-mode . toc-org-mode))
@@ -524,6 +532,7 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
    Ivy-rich enables prettifying the ivy output
 #+begin_src emacs-lisp
   (use-package ivy-rich
+    :diminish ivy-rich-mode
     :hook ((ivy-mode counsel-mode) . ivy-rich-mode)
     :custom
     (ivy-virtual-abbreviate 'abbreviate)
@@ -586,6 +595,7 @@ And since I'm currently using Ivy & Counsel, I'll include the [[https://github.c
 
 #+begin_src emacs-lisp
   (use-package counsel-projectile
+    :diminish
     :demand
     :config
     (counsel-projectile-mode))
@@ -629,8 +639,9 @@ I find it invaluable to have parentheses matching enabled.
 #+end_src
 And I like the visual delimitation of colour. Rainbow-delimiters adds that.
 #+begin_src emacs-lisp
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
+  (use-package rainbow-delimiters
+    :diminish
+    :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
 
 * Line numbers
