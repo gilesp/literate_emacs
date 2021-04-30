@@ -322,13 +322,13 @@ Emacs has a powerful, but confusing, undo model. Undo tree makes it easier to us
 ** Theme
 I like a dark editor, and base16-brewer is what I've got used previously. But now I'm trying a vscode dark theme.
 #+begin_src emacs-lisp
-    ;; (use-package base16-theme
-    ;;     :ensure t
-    ;;     :config
-    ;;     (load-theme 'base16-brewer t))
-(add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes"))
-(load-theme 'vscode-dark-plus t)
-;;(load-theme 'base16-vscode-dark t)
+  (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes"))
+  (load-theme 'vscode-dark-plus t)
+  ;; Remove the border around the TODO word on org-mode files
+  (setq vscode-dark-plus-box-org-todo nil)
+
+  ;; Do not set different heights for some org faces
+  (setq vscode-dark-plus-scale-org-faces nil)
 #+end_src
 
 ** Fonts
