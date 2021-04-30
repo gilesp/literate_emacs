@@ -55,6 +55,7 @@
   - [[#treemacs][Treemacs]]
   - [[#javascriptweb-development-lsp][Javascript/web development (lsp?)]]
 - [[#yaml][Yaml]]
+- [[#restclient][Restclient]]
 
 * About this file
 This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]]. I've also taken inspiration from https://blog.sumtypeofway.com/posts/emacs-config.html and https://assortedarray.com/posts/my-init-org-setup/.
@@ -792,4 +793,22 @@ Alternatively, this could be installed as a docker container, and then you could
   (use-package yaml-mode
     :ensure t
     :mode ("\\.ya?ml\\'" . yaml-mode))
+#+end_src
+
+* Restclient
+[[https://github.com/pashky/restclient.el][A tool for interacting with webservices.]]
+[[https://erick.navarro.io/blog/testing-an-api-with-emacs-and-restclient/][This]] is a good intro to using restclient.
+Bind it to .http files.
+#+begin_src emacs-lisp
+  (use-package restclient
+    :ensure t
+    :mode ("\\.http\\'" . restclient-mode))
+#+end_src
+
+We can enable completion for it via company mode
+#+begin_src emacs-lisp
+  (use-package company-restclient
+    :ensure t
+    :init
+    (add-to-list 'company-backends 'company-restclient))
 #+end_src
