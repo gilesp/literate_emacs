@@ -21,12 +21,15 @@
   - [[#todo-garbage-collection-again][TODO: Garbage Collection (again)]]
   - [[#personal-information][Personal Information]]
   - [[#fix-defaults][Fix defaults]]
+  - [[#automatically-revert-buffers][Automatically Revert Buffers]]
+  - [[#tabs][Tabs]]
   - [[#disable-use-of-the-customize-file][Disable use of the customize file]]
   - [[#disable-backup-files][Disable backup files]]
   - [[#utf-8-all-the-things][UTF-8 all the things!]]
   - [[#unbind-the-pesky-sleep-key][Unbind the pesky sleep key]]
   - [[#use-y-or-n-instead-of-yes-or-no][Use 'y' or 'n' instead of 'yes' or 'no']]
   - [[#a-function-to-set-the-framesize-for-streaming][A function to set the framesize for streaming]]
+  - [[#enable-recentf-mode-recent-files][Enable recentf mode (recent-files)]]
   - [[#enable-overwriting-selected-text][Enable overwriting selected text]]
   - [[#disable-audible-bell-use-visual-instead][Disable audible bell, use visual instead]]
   - [[#show-trailing-white-space][Show trailing white space]]
@@ -54,8 +57,10 @@
 - [[#development-languages][Development languages]]
   - [[#treemacs][Treemacs]]
   - [[#javascriptweb-development-lsp][Javascript/web development (lsp?)]]
+  - [[#java][Java]]
 - [[#yaml][Yaml]]
 - [[#restclient][Restclient]]
+- [[#ulisp][uLisp]]
 
 * About this file
 This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]]. I've also taken inspiration from https://blog.sumtypeofway.com/posts/emacs-config.html and https://assortedarray.com/posts/my-init-org-setup/.
@@ -93,11 +98,11 @@ This is a literate configuration, meaning that it's an org file with embedded co
    #+begin_src emacs-lisp :tangle early-init.el
      (defvar gp/gc-cons-threshold 16777216) ;; 16mb
      (setq gc-cons-threshold most-positive-fixnum
-	   gc-cons-percentage 0.6)
+           gc-cons-percentage 0.6)
      (add-hook 'emacs-startup-hook
-	       (lambda ()
-		 (setq gc-cons-threshold gp/gc-cons-threshold
-		       gc-cons-percentage 0.1)))
+               (lambda ()
+                 (setq gc-cons-threshold gp/gc-cons-threshold
+                       gc-cons-percentage 0.1)))
 
    #+end_src
 
@@ -124,8 +129,8 @@ This is a literate configuration, meaning that it's an org file with embedded co
      (package-refresh-contents)
      (package-install 'use-package))
    (setq use-package-always-ensure t
-	 use-package-ensure-all t
-	 use-package-always-defer t)
+         use-package-ensure-all t
+         use-package-always-defer t)
    (require 'use-package)
    (require 'use-package-ensure)
  #+end_src
@@ -182,6 +187,17 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
    (setq kill-whole-line t)             ;; Let C-k delete the whole line.
  #+end_src
 
+** Automatically Revert Buffers
+   If a file changes on disk, I want the buffer to update. Emacs will prompt if I have unsaved changes, so this is safe to do.
+   #+begin_src emacs-lisp
+     (global-auto-revert-mode 1)
+   #+end_src
+** Tabs
+    Tabs, spaces. It's a whole thing. Fundamentally, I'd love for tabs to work like tabs, and allow users to set their own tab spacing, but that's not the world we live in anymore. So, I need to use spaces.
+    #+begin_src emacs-lisp
+      (setq-default indent-tabs-mode nil)
+      (setq tab-width 4)
+    #+end_src
 ** Disable use of the customize file
     I find this annoying, as it's all too easy to override something by accident with the customize functionality, then your emacs init doesn't work. You can't get rid of it completely, but you can point it at a random file every time.
 
@@ -227,15 +243,24 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
  #+begin_src emacs-lisp
    (defvar gp/frame-normal-width 110)
    (defvar gp/frame-normal-height 58)
-   (defvar gp/frame-streaming-width 109)
-   (defvar gp/frame-streaming-height 31)
+   (defvar gp/frame-streaming-width-720 109)
+   (defvar gp/frame-streaming-height-720 31)
+   (defvar gp/frame-streaming-width-720 188)
+   (defvar gp/frame-streaming-height-720 48)
    (defvar gp/is-streaming-size nil)
 
-   (defun gp/frame-size-streaming ()
+   (defun gp/frame-size-streaming-720 ()
      "Sets the frame size so it's suitable for streaming via OBS at 720p"
      (interactive)
-     (set-frame-width (selected-frame) gp/frame-streaming-width)
-     (set-frame-height (selected-frame) gp/frame-streaming-height)
+     (set-frame-width (selected-frame) gp/frame-streaming-width-720)
+     (set-frame-height (selected-frame) gp/frame-streaming-height-720)
+     (setq gp/is-streaming-size t))
+
+   (defun gp/frame-size-streaming-1080 ()
+     "Sets the frame size so it's suitable for streaming via OBS at 1080p"
+     (interactive)
+     (set-frame-width (selected-frame) gp/frame-streaming-width-1080)
+     (set-frame-height (selected-frame) gp/frame-streaming-height-1080)
      (setq gp/is-streaming-size t))
 
    (defun gp/frame-size-normal ()
@@ -249,14 +274,14 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
      "Toggles between streaming and normal frame sizes"
      (interactive)
      (if (eq gp/is-streaming-size nil)
-       (gp/frame-size-streaming)
+       (gp/frame-size-streaming-720)
      ; else
      (gp/frame-size-normal)))
 
    (gp/frame-size-normal)
  #+end_src
 
- * Enable recentf mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
+** Enable recentf mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
 Recentf is useful to re-open a file you worked on recently, but it's good to set some limits on it. Also, ignore any package files from elpa, as they make it less than useful.
 #+begin_src emacs-lisp
   (require 'recentf)
@@ -291,16 +316,15 @@ I've replaced the recentf-open-files keybinding with counsel-recentf instead.
     (add-hook 'before-save-hook #'delete-trailing-whitespace)
   #+end_src
 
-   Show whitespace also applies to the minibuffer by default, which rather spoils ivy and counsel output. Let's disable that behaviour:
+  We don't want whitespace to be highlighted in all modes, notably the minibuffer, term and compilation buffers. So let's disable it for those modes
   #+begin_src emacs-lisp
-    (add-hook 'minibuffer-setup-hook
-	      (lambda () (setq-local show-trailing-whitespace nil)))
-  #+end_src
-
-   Also, it applies to ansi-term as well, which just looks weird. So I'll turn it off there too.
-  #+begin_src emacs-lisp
-    (add-hook 'term-mode-hook
-	      (lambda () (setq show-trailing-whitespace nil)))
+    (dolist (hook '(special-mode-hook
+                    term-mode-hook
+                    comint-mode-hook
+                    compilation-mode-hook
+                    minibuffer-setup-hook))
+      (add-hook hook
+                (lambda () (setq show-trailing-whitespace nil))))
   #+end_src
 
 ** Highlight current line
@@ -378,7 +402,7 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
     :diminish
     :config
     (which-key-mode 1)
-    (which-key-setup-side-window-bottom))
+    (which-key-setup-minibuffer))
 #+end_src
 
 * Org Mode
@@ -386,17 +410,34 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
   (use-package org
     :pin org ;; use version from orgmode.org/elpa instead of gnu.
     :hook ((org-mode . visual-line-mode)
-	   (org-mode . variable-pitch-mode)) ;; enable a mix of proportional and fixed width fonts.
+           (org-mode . variable-pitch-mode)) ;; enable a mix of proportional and fixed width fonts.
     :custom
     (org-src-tab-acts-natively t)
     (org-src-fontify-natively t) ;; native src block fontification
     (org-src-window-setup 'current-window) ;; edit src blocks in place, rather than a new window
     (org-hide-emphasis-markers t) ;;actually emphasise text (e.g. show as italic instead of /italic/)
+
     )
 
   (use-package org-plus-contrib
     :pin org
     :after org)
+
+  (use-package ob-shell
+    :ensure org-plus-contrib
+    :commands
+    org-babel-execute:sh
+    org-babel-expand-body:sh
+    org-babel-execute:bash
+    org-babel-expand-body:bash
+    :custom
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '(
+       (sh . t)
+       (bash . t)
+       ))
+    )
 #+end_src
 
 Let's make org-mode have dyanmic wrapping, and center it in the frame so that it works a bit more like a typical word processor.
@@ -491,8 +532,8 @@ sudo apt install sqlite3
   ;;   :after org
   ;;   :hook (org-mode . org-roam-mode)
   ;;   :commands (org-roam-buffer-toggle-display
-  ;; 	     org-roam-find-file
-  ;; 	     org-roam-graph))
+  ;;         org-roam-find-file
+  ;;         org-roam-graph))
 #+end_src
 
 I'm telling org roam where to store my notes (my dropbox folder so
@@ -505,8 +546,8 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
 #+begin_src emacs-lisp
   (use-package markdown-mode
     :mode (("README\\.md\\'" . gfm-mode)
-	   ("\\.md\\'" . markdown-mode)
-	   ("\\.markdown\\'" . markdown-mode)))
+           ("\\.md\\'" . markdown-mode)
+           ("\\.markdown\\'" . markdown-mode)))
 #+end_src
 
 * Completion Framework
@@ -568,7 +609,7 @@ Magit is a great interface to git (although the [[https://magit.vc/manual/magit/
 #+begin_src emacs-lisp
   (use-package magit
     :bind (("C-x g" . magit-status)
-	   ("C-x M-g" . magit-dispatch-popup)))
+           ("C-x M-g" . magit-dispatch-popup)))
 #+end_src
 Apart from the keybindings, I don't need to make any config changes.
 
@@ -594,7 +635,7 @@ I enable it globally because I use git for many different files, not just code.
   (use-package projectile
     :demand
     :bind (:map projectile-mode-map
-	      ("C-c p" . projectile-command-map))
+              ("C-c p" . projectile-command-map))
     :init
     (setq projectile-completion-system 'ivy)
     (setq projectile-enable-caching t)
@@ -631,8 +672,8 @@ Got to have those sweet code-completion popups, courtesy of [[https://company-mo
     ;; Use the numbers 0-9 to select company completion candidates
     (let ((map company-active-map))
       (mapc (lambda (x) (define-key map (format "%d" x)
-			  `(lambda () (interactive) (company-complete-number ,x))))
-	    (number-sequence 0 9)))
+                          `(lambda () (interactive) (company-complete-number ,x))))
+            (number-sequence 0 9)))
     :init
     (setq company-tooltip-minimum-width 10)
     (global-company-mode))
@@ -674,10 +715,11 @@ off in other modes, but that seems messier to me.
 #+begin_src emacs-lisp
   (use-package lsp-mode
     :hook (
-	   ;; bind lsp to the development modes I'm interested in.
-	   (web-mode . lsp-deferred)
-	   (yaml-mode . lsp-deferred)
-	   (lsp-mode . lsp-enable-which-key-integration))
+           ;; bind lsp to the development modes I'm interested in.
+           (web-mode . lsp-deferred)
+           (yaml-mode . lsp-deferred)
+           (java-mode . lsp-deferred)
+           (lsp-mode . lsp-enable-which-key-integration))
     :init
     (setq lsp-keymap-prefix "C-l")
     (setq lsp-enable-completion-at-point t)
@@ -687,8 +729,7 @@ off in other modes, but that seems messier to me.
     (setq read-process-output-max (* 1024 1024)) ;; 1mb
     :commands lsp lsp-deferred)
 
-  (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
-
+  (use-package lsp-ui)
 #+end_src
 I've changed the default prefix from "s-l" to "C-l".
 
@@ -715,8 +756,9 @@ Turn on ivy integration for lsp:
 
    Sometimes I want an IDE style tree view, so lets enable treemacs and lsp-treemacs
 #+begin_src emacs-lisp
-    (use-package lsp-treemacs
-      :after (treemacs lsp-mode))
+  (use-package lsp-treemacs
+    :commands lsp-treemacs-errors-list
+    :after (treemacs lsp-mode))
 #+end_src
 
 Treemacs provides a very configurable tree-view. I'm going to see how I get on with it, so I've just grabbed a basic config from the [[https://github.com/Alexander-Miller/treemacs][treemacs documentation]].
@@ -724,29 +766,30 @@ Treemacs provides a very configurable tree-view. I'm going to see how I get on w
 C-x t t should toggle the treeview, and I'll see how I get on with that.
 
 #+begin_src emacs-lisp
-(use-package treemacs
-  :ensure t
-  :defer t
-  :init
-  (with-eval-after-load 'winum
-    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-  :config
-  (progn
-    ;; The default width and height of the icons is 22 pixels. If you are
-    ;; using a Hi-DPI display, uncomment this to double the icon size.
-    ;;(treemacs-resize-icons 44)
+  (use-package treemacs
+    :ensure t
+    :defer t
+    :init
+    (with-eval-after-load 'winum
+      (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+    :config
+    (progn
+      ;; The default width and height of the icons is 22 pixels. If you are
+      ;; using a Hi-DPI display, uncomment this to double the icon size.
+      ;;(treemacs-resize-icons 44)
 
-    (treemacs-follow-mode t)
-    (treemacs-filewatch-mode t)
-    (treemacs-fringe-indicator-mode 'always))
-  :bind
-  (:map global-map
-        ("M-0"       . treemacs-select-window)
-        ("C-x t 1"   . treemacs-delete-other-windows)
-        ("C-x t t"   . treemacs)
-        ("C-x t B"   . treemacs-bookmark)
-        ("C-x t C-t" . treemacs-find-file)
-        ("C-x t M-t" . treemacs-find-tag)))
+      (treemacs-tag-follow-mode t)
+      (treemacs-filewatch-mode t)
+      (treemacs-fringe-indicator-mode 'always)
+      (treemacs-git-mode 'simple))
+    :bind
+    (:map global-map
+          ("M-0"       . treemacs-select-window)
+          ("C-x t 1"   . treemacs-delete-other-windows)
+          ("C-x t t"   . treemacs)
+          ("C-x t B"   . treemacs-bookmark)
+          ("C-x t C-t" . treemacs-find-file)
+          ("C-x t M-t" . treemacs-find-tag)))
 #+end_src
 
 And since we're also using projectile, let's enable treemacs integration
@@ -756,6 +799,12 @@ And since we're also using projectile, let's enable treemacs integration
     :ensure t)
 #+end_src
 
+Make things pretty with all-the-icons
+#+begin_src emacs-lisp
+  (use-package treemacs-all-the-icons
+    :after (treemacs))
+#+end_src
+
 ** Javascript/web development (lsp?)
    There are several ways to configure javascript & typescript support. I'm going with web-mode since it can handle template-based development (react, vue etc.) along with raw js & ts files.
 
@@ -763,12 +812,12 @@ And since we're also using projectile, let's enable treemacs integration
   (use-package web-mode
     :ensure t
     :mode (("\\.js\\'" . web-mode)
-	   ("\\.jsx\\'" . web-mode)
-	   ("\\.ts\\'" . web-mode)
-	   ("\\.tsx\\'" . web-mode)
-	   ("\\.html\\'" . web-mode)
-	   ("\\.vue\\'" . web-mode)
-	   ("\\.json\\'" . web-mode))
+           ("\\.jsx\\'" . web-mode)
+           ("\\.ts\\'" . web-mode)
+           ("\\.tsx\\'" . web-mode)
+           ("\\.html\\'" . web-mode)
+           ("\\.vue\\'" . web-mode)
+           ("\\.json\\'" . web-mode))
     :commands web-mode
     :config
     (setq company-tooltip-align-annotations t)
@@ -777,7 +826,7 @@ And since we're also using projectile, let's enable treemacs integration
     (setq web-mode-code-indent-offset 2)
     (setq web-mode-enable-part-face t)
     (setq web-mode-content-types-alist
-	  '(("jsx" . "\\.js[x]?\\'")))
+          '(("jsx" . "\\.js[x]?\\'")))
     )
 #+end_src
 
@@ -788,6 +837,30 @@ npm i -g javascript-typescript-langserver
 
 Alternatively, this could be installed as a docker container, and then you could avoid installing npm/node on your local machine. I'll have to give that another go sometime.
 
+** Java
+   Setup lsp-java
+   #+begin_src emacs-lisp
+     (use-package lsp-java
+      :hook (java-mode . lsp))
+   #+end_src
+
+   Also configure dap-mode for debugging.
+   #+begin_src emacs-lisp
+     (use-package dap-mode
+       :after lsp-mode
+
+       :config (dap-auto-configure-mode)
+       (add-hook 'dap-stopped-hook
+                 (lambda (arg) (call-interactively #'dap-hydra))))
+
+     (use-package dap-java
+       :ensure nil)
+   #+end_src
+
+     When doing maven builds etc, it's nice to have the compilation buffer autoscroll:
+   #+begin_src emacs-lisp
+     (setq compilation-scroll-output t)
+   #+end_src
 * Yaml
 #+begin_src emacs-lisp
   (use-package yaml-mode
@@ -809,6 +882,32 @@ We can enable completion for it via company mode
 #+begin_src emacs-lisp
   (use-package company-restclient
     :ensure t
-    :init
-    (add-to-list 'company-backends 'company-restclient))
+    :after (company restclient)
+    :hook ((restclient-mode-hook . (lambda() (setq company-backend (company-restclient))))))
 #+end_src
+
+And, of course, we can integrate it with org mode:
+#+begin_src emacs-lisp
+  (use-package ob-restclient
+     :ensure t
+     :defer t
+     :after org restclient
+     :init
+     (org-babel-do-load-languages
+      'org-babel-load-languages
+      '((restclient . t))))
+#+end_src
+
+* uLisp
+  I've installed [[http://www.ulisp.com/show?3KN3][uLisp]] on a Raspberry Pi Pico, and it should be possible to use inferior lisp mode to interacti with it.
+
+  #+begin_src emacs-lisp
+    (defvar port "/dev/ttyACM1" "rasoberry-pi-pico")
+    (defvar bauds 9600 "Bps")
+    (defun sb-open()
+      (let ((serial-buffer (serial-term port bauds)))
+        (with-current-buffer
+            (rename-buffer "*inferior-lisp*")
+          (term-line-mode)
+          (setq inferior-lisp-buffer serial-buffer))))
+  #+end_src
