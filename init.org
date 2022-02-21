@@ -96,8 +96,9 @@ This is a literate configuration, meaning that it's an org file with embedded co
   #+begin_src emacs-lisp :tangle early-init.el
     ;;; early-init.el -*- lexical-binding: t; eval: (view-mode -1); -*-
     (require 'package)
-    (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+    (add-to-list 'package-archives '("nongnu" . "https://elpa.nongnu.org/nongnu/") t)
+    (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
   #+end_src
 
   Taking inspiration from [[https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-does-doom-start-up-so-quickly][doom-emacs]], I'm going to bump the garbage collection threshold up during startup to help speed things up. Then we reset it after startup.
