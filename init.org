@@ -39,9 +39,13 @@
     - [[#mode-line][Mode line]]
   - [[#fonts][Fonts]]
   - [[#which-key][Which key]]
+- [[#yasnippet---text-completion][YASnippet - text completion]]
 - [[#org-mode][Org Mode]]
   - [[#toc-org][Toc-org]]
   - [[#org-roam][Org Roam]]
+  - [[#org-capture][Org Capture]]
+  - [[#org-protocol][Org Protocol]]
+  - [[#org-tree-slide][org-tree-slide]]
 - [[#markdown][Markdown]]
 - [[#completion-framework][Completion Framework]]
   - [[#ivy][Ivy]]
@@ -406,26 +410,51 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
     (which-key-setup-minibuffer))
 #+end_src
 
+* YASnippet - text completion
+
+#+begin_src emacs-lisp
+(use-package yasnippet
+       :ensure t
+       :init
+       (yas-global-mode 1)
+       :config
+       (add-to-list 'yas-snippet-dirs (locate-user-emacs-file "snippets")))
+#+end_src
+
 * Org Mode
 #+begin_src emacs-lisp
+  (setq org-startup-with-inline-images t)
   (use-package org
-    :pin org ;; use version from orgmode.org/elpa instead of gnu.
+    :bind (("C-c c" . org-capture))
     :hook ((org-mode . visual-line-mode)
-           (org-mode . variable-pitch-mode)) ;; enable a mix of proportional and fixed width fonts.
+           (org-mode . variable-pitch-mode) ;; enable a mix of proportional and fixed width fonts.
+           (org-mode . org-indent-mode)) ;; indent headings & paragraphs
     :custom
     (org-src-tab-acts-natively t)
     (org-src-fontify-natively t) ;; native src block fontification
     (org-src-window-setup 'current-window) ;; edit src blocks in place, rather than a new window
     (org-hide-emphasis-markers t) ;;actually emphasise text (e.g. show as italic instead of /italic/)
-
+    (org-confirm-babel-evaluate nil)
+    (org-indent-indentation-per-level 2)
+    (org-adapt-indentation nil)
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     (append org-babel-load-languages
+             '((dot . t)))) ;; enable graphviz src blocks
+    (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
+    :config
+      (progn
+        (add-hook 'org-babel-after-execute-hook 'org-display-inline-images))
     )
 
-  (use-package org-plus-contrib
-    :pin org
+  (use-package org-contrib
     :after org)
 
+  (require 'ob-dot) ;; have to do this for some reason, otherwise babel can't handle dot.
+  ;; would be good to be able to do it via use-package
+
   (use-package ob-shell
-    :ensure org-plus-contrib
+    :ensure org-contrib
     :commands
     org-babel-execute:sh
     org-babel-expand-body:sh
@@ -434,46 +463,61 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
     :custom
     (org-babel-do-load-languages
      'org-babel-load-languages
+     (append org-babel-load-languages
      '(
        (sh . t)
        (bash . t)
-       ))
+       )))
     )
+
 #+end_src
+
+#+RESULTS:
 
 Let's make org-mode have dyanmic wrapping, and center it in the frame so that it works a bit more like a typical word processor.
 
 For this, I make use of [[https://elpa.gnu.org/packages/adaptive-wrap.html][adaptive-wrap]], [[https://www.emacswiki.org/emacs/VisualLineMode][visual-line-mode]], [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]] and [[https://github.com/mpwang/perfect-margin][perfect-margin]], then text behaves as if you'd used M-q but without actually adding line breaks to the source text.
+
+I'm no longer using perfect-margin et al as it would act globally, no matter what I tried. So I'm using [[https://github.com/rnkn/olivetti][olivetti mode]] instead.
+
 #+begin_src emacs-lisp
-  (use-package adaptive-wrap
-    :diminish adaptive-wrap-prefix-mode
-    :hook (org-mode . adaptive-wrap-prefix-mode))
+  ;; (use-package adaptive-wrap
+  ;;   :diminish adaptive-wrap-prefix-mode
+  ;;   :hook (org-mode . adaptive-wrap-prefix-mode))
 
-  (use-package visual-fill-column
-    :diminish
-    :hook (visual-line-mode . visual-fill-column-mode)
-    :custom
-    (visual-fill-column-width 80))
+  ;; (use-package visual-fill-column
+  ;;   :diminish
+  ;;   :hook (visual-line-mode . visual-fill-column-mode)
+  ;;   :custom
+  ;;   (visual-fill-column-width 80))
 
-  ;; centre the org-mode area in the frame.
-  (use-package perfect-margin
+  ;; ;; centre the org-mode area in the frame.
+  ;; (use-package perfect-margin
+  ;;   :diminish
+  ;;   :hook (org-mode . perfect-margin-mode)
+  ;;   :custom
+  ;;   (perfect-margin-visible-width 80)
+  ;;   :init
+  ;;   (defcustom perfect-margin-ignore-regexps
+  ;;     '("^minibuf" "^[*]" "^magit" "^COMMIT_")
+  ;;     "List of strings to determine if window is ignored.
+  ;; Each string is used as regular expression to match the window buffer name."
+  ;;     :group 'perfect-margin)
+
+  ;;   (defcustom perfect-margin-ignore-filters
+  ;;     '(window-minibuffer-p)
+  ;;     "List of functions to determine if window is ignored.
+  ;; Each function is called with window as its sole arguemnt, returning a non-nil value indicate to ignore the window."
+  ;;     :group 'perfect-margin)
+  ;;   )
+  (use-package olivetti
     :diminish
-    :hook (org-mode . perfect-margin-mode)
-    :custom
-    (perfect-margin-visible-width 80)
     :init
-    (defcustom perfect-margin-ignore-regexps
-      '("^minibuf" "^[*]" "^magit" "^COMMIT_")
-      "List of strings to determine if window is ignored.
-  Each string is used as regular expression to match the window buffer name."
-      :group 'perfect-margin)
-
-    (defcustom perfect-margin-ignore-filters
-      '(window-minibuffer-p)
-      "List of functions to determine if window is ignored.
-  Each function is called with window as its sole arguemnt, returning a non-nil value indicate to ignore the window."
-      :group 'perfect-margin)
-    )
+    (setq-default fill-column 120)
+    :config
+    (olivetti-set-width 100) ;; olivetti mode seems to go wider then 100, so I set the fill column to 120 to visually match.
+    (setq olivetti-style "fancy")
+    :hook (org-mode . olivetti-mode))
 #+end_src
 
 To make org mode look a bit nicer, I like to use the org-bullets package to replace headline markers with Unicode bullets.
@@ -539,7 +583,72 @@ sudo apt install sqlite3
 
 I'm telling org roam where to store my notes (my dropbox folder so
 they get synched between machines).
+** Org Capture
+   I'm going to try keeping a daily log with org mode, using a capture template to append a note to the current day's file.
 
+   #+begin_src emacs-lisp
+     (global-set-key (kbd "C-c c") 'org-capture)
+
+     (setq org-default-notes-file "~/Dropbox/org/capture.org")
+
+     (setq org-capture-templates
+          '(
+            ("j" "Journal Entry"
+             entry (file+datetree "~/Documents/journal.org")
+             "* %?"
+             :empty-lines 1)
+            ("t" "Task"
+             entry (file+datetree "~/Documents/journal.org")
+             "* TODO %?"
+             :empty-lines 1)
+            ("w" "Web clip"
+             entry (file+datetree "~/Documents/journal.org")
+             "* %^{Title}\n\n Source %:annotation\n\n %i\n\n%?"
+             :empty-lines 1)
+            ))
+
+   #+end_src
+
+   I start by defining C-c c as the keybinding to trigger capture. This is set globally so I can capture a note from anywhere in emacs.
+
+
+   I define a default notes file for general capturing, then I define a template for journal entries, which is what I will hopefully use most of the time. Currently this stores all notes in one file, rather than a file per day, but i'll see how I get on with that before making changes.
+
+** Org Protocol
+   Org capture works well within emacs but if you want to make a note based on something in another application [[https://orgmode.org/manual/Protocols.html#Protocols][org-protocol]] can help.
+
+   Firstly, we need to have the emacs server running, so emacsclient can talk to it.
+   #+begin_src emacs-lisp
+     (require 'server)
+     (unless (server-running-p)
+       (server-start))
+   #+end_src
+
+   Then we require org-protocol
+   #+begin_src emacs-lisp
+     (require 'org-protocol)
+   #+end_src
+
+   And that should be that. The host operating system needs to have a url handler registered for the org-protocol: url. For Mac OS, I've followed [[https://orgmode.org/manual/Protocols.html#Protocols][this approach using an apple script]].
+
+   The "Web clip" capture template defined above can be used with this javascript bookmarklet to make a note using a selection from a web site.
+
+   #+begin_src javascript :tangle no
+     javascript:location.href='org-protocol://capture?template=w'+
+      '&url='+encodeURIComponent(window.location.href)+
+      '&title='+encodeURIComponent(document.title)+
+      '&body='+encodeURIComponent(window.getSelection());
+   #+end_src
+
+
+** org-tree-slide
+For giving presentations with org mode
+#+begin_src emacs-lisp
+  (use-package org-tree-slide
+    :bind (("<f8>" . org-tree-slide-mode)
+           ("S-<f8>" . org-tree-slide-skip-done-toggle)))
+
+#+end_src
 * Markdown
 Sometimes I need to edit markdown, so here's how to configure [[https://github.com/jrblevin/markdown-mode][markdown-mode]].
 For README.md files, use github flavoured markdown, otherwise use normal markdown mode.
