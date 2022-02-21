@@ -28,6 +28,7 @@
   - [[#utf-8-all-the-things][UTF-8 all the things!]]
   - [[#unbind-the-pesky-sleep-key][Unbind the pesky sleep key]]
   - [[#use-y-or-n-instead-of-yes-or-no][Use 'y' or 'n' instead of 'yes' or 'no']]
+  - [[#fix-macos-path-nonsense][Fix MacOS Path nonsense]]
   - [[#a-function-to-set-the-framesize-for-streaming][A function to set the framesize for streaming]]
   - [[#enable-recentf-mode-recent-files][Enable recentf mode (recent-files)]]
   - [[#enable-overwriting-selected-text][Enable overwriting selected text]]
@@ -241,6 +242,23 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
 ** Use 'y' or 'n' instead of 'yes' or 'no'
 #+begin_src emacs-lisp
   (fset 'yes-or-no-p 'y-or-n-p)
+#+end_src
+
+** Fix MacOS Path nonsense
+   on OS X, where an Emacs instance launched as a GUI app inherits a default minimal set of environment variables that
+   are probably not the ones you see in a terminal window. Similarly, if you start Emacs as a daemon from systemd or
+   launchd, it will run with a default set of environment variables.
+
+This library solves this problem by copying important environment variables from the user's shell: it works by asking your shell to print out the variables of interest, then copying them into the Emacs environment.
+
+#+begin_src emacs-lisp
+  (defconst *is-a-mac* (eq system-type 'darwin))
+  (use-package exec-path-from-shell
+    :ensure t)
+  ;;Later on, after loading exec-path-from-shell package
+
+  (if *is-a-mac*
+     (add-hook 'after-init-hook 'exec-path-from-shell-initialize))
 #+end_src
 
 ** A function to set the framesize for streaming
