@@ -269,8 +269,8 @@ This library solves this problem by copying important environment variables from
    (defvar gp/frame-normal-height 58)
    (defvar gp/frame-streaming-width-720 109)
    (defvar gp/frame-streaming-height-720 31)
-   (defvar gp/frame-streaming-width-720 188)
-   (defvar gp/frame-streaming-height-720 48)
+   (defvar gp/frame-streaming-width-1080 188)
+   (defvar gp/frame-streaming-height-1080 48)
    (defvar gp/is-streaming-size nil)
 
    (defun gp/frame-size-streaming-720 ()
@@ -394,7 +394,7 @@ I like a dark editor, and base16-brewer is what I've got used previously. But no
 #+end_src
 
 ** Fonts
-A matter of personal opinion, but a modern mono-spaced font makes emacs look a lot better. I'm currently trying [[https://github.com/microsoft/cascadia-code][Cascadia Code]], which can be installed on debian with =sudo apt install fonts-cascadia-code=.
+A matter of personal opinion, but a modern mono-spaced font makes emacs look a lot better.
 
 I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pitch (i.e. monospace)
 
@@ -564,8 +564,8 @@ In order for variable-pitch-mode to work properly, I need to set fixed pitch fon
 #+end_src
 
 ** Toc-org
- Install the =toc-org= package after org mode is loaded. This enables
- automatic generation of up to date tables of contents.
+ Install the =toc-org= package after org mode is loaded. This enables automatic generation of up to
+ date tables of contents.
 
  #+begin_src emacs-lisp
    (use-package toc-org
