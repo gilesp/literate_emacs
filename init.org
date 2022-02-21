@@ -61,6 +61,7 @@
 - [[#yaml][Yaml]]
 - [[#restclient][Restclient]]
 - [[#ulisp][uLisp]]
+- [[#remote-access-with-tramp][Remote access with Tramp]]
 
 * About this file
 This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]]. I've also taken inspiration from https://blog.sumtypeofway.com/posts/emacs-config.html and https://assortedarray.com/posts/my-init-org-setup/.
@@ -899,15 +900,26 @@ And, of course, we can integrate it with org mode:
 #+end_src
 
 * uLisp
-  I've installed [[http://www.ulisp.com/show?3KN3][uLisp]] on a Raspberry Pi Pico, and it should be possible to use inferior lisp mode to interacti with it.
 
-  #+begin_src emacs-lisp
-    (defvar port "/dev/ttyACM1" "rasoberry-pi-pico")
-    (defvar bauds 9600 "Bps")
-    (defun sb-open()
-      (let ((serial-buffer (serial-term port bauds)))
-        (with-current-buffer
-            (rename-buffer "*inferior-lisp*")
-          (term-line-mode)
-          (setq inferior-lisp-buffer serial-buffer))))
+
+
+    I've installed [[http://www.ulisp.com/show?3KN3][uLisp]] on a Raspberry Pi Pico, and it should be possible to use inferior lisp mode to interact with it.
+
+
+    ,#+begin_src emacs-lisp
+      (defvar port "/dev/ttyACM1" "rasoberry-pi-pico")
+      (defvar bauds 9600 "Bps")
+      (defun sb-open()
+        (let ((serial-buffer (serial-term port bauds)))
+          (with-current-buffer
+              (rename-buffer "*inferior-lisp*")
+            (term-line-mode)
+            (setq inferior-lisp-buffer serial-buffer))))
   #+end_src
+
+* Remote access with Tramp
+  Tramp is an emacs feature that lets you edit a file on a remote machine via ssh and other methods. I only really want ssh, so I'll set that as the default
+
+#+begin_src emacs-lisp
+  (setq tramp-default-method "ssh")
+#+end_src
