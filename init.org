@@ -424,9 +424,10 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
 #+begin_src emacs-lisp
   (use-package which-key
     :diminish
+    :demand t
     :config
     (which-key-mode 1)
-    (which-key-setup-minibuffer))
+    (which-key-setup-side-window-bottom))
 #+end_src
 
 * YASnippet - text completion
