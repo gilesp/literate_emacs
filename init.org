@@ -43,7 +43,6 @@
 - [[#yasnippet---text-completion][YASnippet - text completion]]
 - [[#org-mode][Org Mode]]
   - [[#toc-org][Toc-org]]
-  - [[#org-roam][Org Roam]]
   - [[#org-capture][Org Capture]]
   - [[#org-protocol][Org Protocol]]
   - [[#org-tree-slide][org-tree-slide]]
@@ -445,10 +444,14 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
 #+begin_src emacs-lisp
   (setq org-startup-with-inline-images t)
   (use-package org
-    :bind (("C-c c" . org-capture))
     :hook ((org-mode . visual-line-mode)
            (org-mode . variable-pitch-mode) ;; enable a mix of proportional and fixed width fonts.
            (org-mode . org-indent-mode)) ;; indent headings & paragraphs
+    :bind (("C-c l" . org-store-link))
+    :init
+    (defun gp/list-note-files ()
+      "Get list of org files in my notes directory"
+      (directory-files-recursively "~/Dropbox/org/notes/" "\\`[^.].*\\.org\\'"))
     :custom
     (org-src-tab-acts-natively t)
     (org-src-fontify-natively t) ;; native src block fontification
@@ -462,9 +465,17 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
      (append org-babel-load-languages
              '((dot . t)))) ;; enable graphviz src blocks
     (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
+
+    ;; Make note files searchable without just adding them to agenda files, and slowing everythign down.
+    (org-agenda-text-search-extra-files (gp/list-note-files))
+
+    ;; use uuid for links
+    (org-id-link-to-org-use-id t)
+    (org-id-extra-files 'org-agenda-text-search-extra-files)
     :config
       (progn
         (add-hook 'org-babel-after-execute-hook 'org-display-inline-images))
+      (org-id-update-id-locations)
     )
 
   (use-package org-contrib
@@ -576,64 +587,65 @@ In order for variable-pitch-mode to work properly, I need to set fixed pitch fon
      :hook (org-mode . toc-org-mode))
 
  #+end_src
-** Org Roam
-I'm not using org roam at the moment so this config is disabled.
-
-I didn't get the chance to use it properly so there's no point leaving
-it hanging around.
-
-+I'm going to try using [[https://www.orgroam.com/][org roam]] to manage my note-taking. It's based+
-+around the [[https://en.wikipedia.org/wiki/Zettelkasten][Zettelkasten]] technique, which is similar to how I've made+
-+notes in the past, only more organised ;-)+
-
-+org-roam requires sqlite3 to be installed, so if it isn't, run this:+
-#+begin_src sh :tangle no
-sudo apt install sqlite3
-#+end_src
-
-#+begin_src emacs-lisp :tangle no
-  ;; (use-package org-roam
-  ;;   :init (setq org-roam-directory "~/Documents/Dropbox/org-roam")
-  ;;   :after org
-  ;;   :hook (org-mode . org-roam-mode)
-  ;;   :commands (org-roam-buffer-toggle-display
-  ;;         org-roam-find-file
-  ;;         org-roam-graph))
-#+end_src
-
-I'm telling org roam where to store my notes (my dropbox folder so
-they get synched between machines).
 ** Org Capture
-   I'm going to try keeping a daily log with org mode, using a capture template to append a note to the current day's file.
+I'm trying to use org mode for managing a simple(ish) todo list. I want to be able to capture tasks quickly, then sort & action them appropriately.
 
+I'll start with a single todo file and see how i get on with that.
+
+I've also created a template for notes - it uses a function to create a new note file and then captures to that.
    #+begin_src emacs-lisp
-     (global-set-key (kbd "C-c c") 'org-capture)
+     (use-package org-capture
+       :ensure nil
+       :after org
+       :defer 1
+       :bind (("C-c c" . org-capture))
+       :config
+       ;; set task priority range from A to C with default B
+       (setq org-highest-priority ?A)
+       (setq org-lowest-priority ?C)
+       (setq org-default-priority ?B)
 
-     (setq org-default-notes-file "~/Dropbox/org/capture.org")
+       ;; After a successful capture, update the org agenda extra files so that searching includes the newly captured file
+       (defun gp/update-agenda-files ()
+         (if org-note-abort
+             ()
+           (setq org-agenda-text-search-extra-files (gp/list-note-files))))
 
-     (setq org-capture-templates
-          '(
-            ("j" "Journal Entry"
-             entry (file+datetree "~/Documents/journal.org")
-             "* %?"
-             :empty-lines 1)
-            ("t" "Task"
-             entry (file+datetree "~/Documents/journal.org")
-             "* TODO %?"
-             :empty-lines 1)
-            ("w" "Web clip"
-             entry (file+datetree "~/Documents/journal.org")
-             "* %^{Title}\n\n Source %:annotation\n\n %i\n\n%?"
-             :empty-lines 1)
-            ))
+       (add-hook 'org-capture-after-finalize-hook 'gp/update-agenda-files)
 
+       (defun gp/capture-note-file (path)
+         "Create an org file in path"
+         (let ((name (read-string "Name: ")))
+           (expand-file-name (format "%s.org"
+                                     name)
+                             path)))
+
+       (setq org-capture-templates
+             '(
+               ("t" "Todo"
+                entry (file+headline "~/Dropbox/org/todo.org" "Tasks")
+                "* TODO [#B] %?")
+               ("n" "Note"
+                entry (file (lambda () (gp/capture-note-file "~/Dropbox/org/notes")))
+                "* TITLE%?\n %U")
+               ))
+       )
    #+end_src
 
    I start by defining C-c c as the keybinding to trigger capture. This is set globally so I can capture a note from anywhere in emacs.
 
-
-   I define a default notes file for general capturing, then I define a template for journal entries, which is what I will hopefully use most of the time. Currently this stores all notes in one file, rather than a file per day, but i'll see how I get on with that before making changes.
-
+#+begin_src emacs-lisp
+  (use-package org-agenda
+    :ensure nil
+    :after org
+    :bind (("C-c a" . org-agenda))
+    :custom
+    ;; open agenda in current window
+    (org-agenda-window-setup (quote current-window))
+    ;; file to save todo items
+    (org-agenda-files (quote ("~/Dropbox/org/todo.org")))
+    )
+#+end_src
 ** Org Protocol
    Org capture works well within emacs but if you want to make a note based on something in another application [[https://orgmode.org/manual/Protocols.html#Protocols][org-protocol]] can help.
 
