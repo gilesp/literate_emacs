@@ -66,6 +66,7 @@
 - [[#restclient][Restclient]]
 - [[#ulisp][uLisp]]
 - [[#remote-access-with-tramp][Remote access with Tramp]]
+- [[#structurizr-mode][Structurizr Mode]]
 
 * About this file
 This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]]. I've also taken inspiration from https://blog.sumtypeofway.com/posts/emacs-config.html and https://assortedarray.com/posts/my-init-org-setup/.
@@ -1063,4 +1064,14 @@ And, of course, we can integrate it with org mode:
 
 #+begin_src emacs-lisp
   (setq tramp-default-method "ssh")
+#+end_src
+
+* Structurizr Mode
+This is my custom structurizr mode (available on github at https://github.com/gilesp/structurizr-mode).
+
+#+begin_src emacs-lisp
+    (use-package structurizr-mode
+      :ensure nil
+      :load-path "/Users/gilespaterson/projects/structurizr-mode"
+      :mode ("\\.dsl\\'" . structurizr-mode))
 #+end_src
