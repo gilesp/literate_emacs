@@ -442,12 +442,14 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
 #+end_src
 
 * Org Mode
+:PROPERTIES:
+:ID:       66E848BA-D50A-427B-8660-1FCAD5A8FF8B
+:END:
 #+begin_src emacs-lisp
   (setq org-startup-with-inline-images t)
   (use-package org
     :hook ((org-mode . visual-line-mode)
-           (org-mode . variable-pitch-mode) ;; enable a mix of proportional and fixed width fonts.
-           (org-mode . org-indent-mode)) ;; indent headings & paragraphs
+           (org-mode . variable-pitch-mode)) ;; enable a mix of proportional and fixed width fonts.
     :bind (("C-c l" . org-store-link))
     :init
     (defun gp/list-note-files ()
@@ -473,6 +475,9 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
     ;; use uuid for links
     (org-id-link-to-org-use-id t)
     (org-id-extra-files 'org-agenda-text-search-extra-files)
+
+    ;; automatically indent headings and paragraphs
+    (org-startup-indented t)
     :config
       (progn
         (add-hook 'org-babel-after-execute-hook 'org-display-inline-images))
@@ -589,6 +594,9 @@ In order for variable-pitch-mode to work properly, I need to set fixed pitch fon
 
  #+end_src
 ** Org Capture
+:PROPERTIES:
+:ID:       0B1D3C79-1E20-4F1C-907C-C86327A1C325
+:END:
 I'm trying to use org mode for managing a simple(ish) todo list. I want to be able to capture tasks quickly, then sort & action them appropriately.
 
 I'll start with a single todo file and see how i get on with that.
@@ -628,7 +636,7 @@ I've also created a template for notes - it uses a function to create a new note
                 "* TODO [#B] %?")
                ("n" "Note"
                 entry (file (lambda () (gp/capture-note-file "~/Dropbox/org/notes")))
-                "* TITLE%?\n %U")
+                "* %?\n%U")
                ))
        )
    #+end_src
