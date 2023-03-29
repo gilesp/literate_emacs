@@ -1048,15 +1048,15 @@ And, of course, we can integrate it with org mode:
     I've installed [[http://www.ulisp.com/show?3KN3][uLisp]] on a Raspberry Pi Pico, and it should be possible to use inferior lisp mode to interact with it.
 
 
-    ,#+begin_src emacs-lisp
-      (defvar port "/dev/ttyACM1" "rasoberry-pi-pico")
-      (defvar bauds 9600 "Bps")
-      (defun sb-open()
-        (let ((serial-buffer (serial-term port bauds)))
-          (with-current-buffer
-              (rename-buffer "*inferior-lisp*")
-            (term-line-mode)
-            (setq inferior-lisp-buffer serial-buffer))))
+ #+begin_src emacs-lisp
+   (defvar port "/dev/ttyACM1" "rasoberry-pi-pico")
+   (defvar bauds 9600 "Bps")
+   (defun sb-open()
+     (let ((serial-buffer (serial-term port bauds)))
+       (with-current-buffer
+           (rename-buffer "*inferior-lisp*")
+         (term-line-mode)
+         (setq inferior-lisp-buffer serial-buffer))))
   #+end_src
 
 * Remote access with Tramp
