@@ -614,6 +614,10 @@ I've also created a template for notes - it uses a function to create a new note
        (setq org-lowest-priority ?C)
        (setq org-default-priority ?B)
 
+       ;; define todo states
+       (setq org-todo-keywords
+             '((sequence "TODO(t)" "WORK(w)" "DONE(d)")))
+
        ;; After a successful capture, update the org agenda extra files so that searching includes the newly captured file
        (defun gp/update-agenda-files ()
          (if org-note-abort
