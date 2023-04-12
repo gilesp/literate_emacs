@@ -469,7 +469,7 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
              '((dot . t)))) ;; enable graphviz src blocks
     (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
 
-    ;; Make note files searchable without just adding them to agenda files, and slowing everythign down.
+    ;; Make note files searchable without just adding them to agenda files, and slowing everything down.
     (org-agenda-text-search-extra-files (gp/list-note-files))
 
     ;; use uuid for links
