@@ -67,6 +67,7 @@
   - [[#treemacs][Treemacs]]
   - [[#javascriptweb-development-lsp][Javascript/web development (lsp?)]]
   - [[#java][Java]]
+  - [[#rust][Rust]]
 - [[#yaml][Yaml]]
 - [[#restclient][Restclient]]
 - [[#ulisp][uLisp]]
@@ -869,24 +870,24 @@ And since I'm currently using Ivy & Counsel, I'll include the [[https://github.c
 * Code/Text Completion (company-mode)
 Got to have those sweet code-completion popups, courtesy of [[https://company-mode.github.io/][company-mode]].
 #+begin_src emacs-lisp
-  (use-package company
-    :diminish
-    :bind (("C-." . #'company-complete))
-    :custom
-    (company-dabbrev-downcase nil "Don't downcase returned candidates.")
-    (company-show-numbers t "Numbers are helpful.")
-    (company-tooltip-limit 20 "The more the merrier.")
-    (company-tooltip-idle-delay 0.4 "Faster!")
-    (company-async-timeout 20 "Some requests can take a long time. That's fine.")
-    :config
-    ;; Use the numbers 0-9 to select company completion candidates
-    (let ((map company-active-map))
-      (mapc (lambda (x) (define-key map (format "%d" x)
-                          `(lambda () (interactive) (company-complete-number ,x))))
-            (number-sequence 0 9)))
-    :init
-    (setq company-tooltip-minimum-width 10)
-    (global-company-mode))
+    (use-package company
+      :diminish
+      :bind (("C-." . #'company-complete))
+      :custom
+      (company-dabbrev-downcase nil "Don't downcase returned candidates.")
+      (company-show-numbers t "Numbers are helpful.")
+      (company-tooltip-limit 20 "The more the merrier.")
+      (company-tooltip-idle-delay 0.4 "Faster!")
+      (company-async-timeout 20 "Some requests can take a long time. That's fine.")
+      :config
+      ;; Use the numbers 0-9 to select company completion candidates
+      (let ((map company-active-map))
+        (mapc (lambda (x) (define-key map (format "%d" x)
+                            `(lambda () (interactive) (company-complete-number ,x))))
+              (number-sequence 0 9)))
+      :init
+      (setq company-tooltip-minimum-width 10)
+      (global-company-mode))
 #+end_src
 I've had issues with company popups being ragged when I'm using a proportional font. So I'm using [[https://github.com/tumashu/company-posframe/][company-posframe]] to enable child frames instead.
 #+begin_src emacs-lisp
@@ -958,8 +959,9 @@ Similarly the the amount of data which Emacs reads from the process needs increa
 
 Turn on ivy integration for lsp:
 #+begin_src emacs-lisp
-  (use-package lsp-ivy
-    :after (ivy lsp-mode))
+    (use-package lsp-ivy
+      :after (ivy lsp-mode)
+      :commands lsp-ivy-workspace-symbol)
 #+end_src
 
 ** Treemacs
@@ -967,6 +969,8 @@ Turn on ivy integration for lsp:
    Sometimes I want an IDE style tree view, so lets enable treemacs and lsp-treemacs
 #+begin_src emacs-lisp
   (use-package lsp-treemacs
+    :config
+    (lsp-treemacs-sync-mode 1)
     :commands lsp-treemacs-errors-list
     :after (treemacs lsp-mode))
 #+end_src
@@ -1051,7 +1055,9 @@ Alternatively, this could be installed as a docker container, and then you could
    Setup lsp-java
    #+begin_src emacs-lisp
      (use-package lsp-java
-      :hook (java-mode . lsp))
+      :hook (java-mode . lsp)
+      :bind (:map java-mode-map
+                  ([tab] . company-indent-or-complete-common)))
    #+end_src
 
    Also configure dap-mode for debugging.
@@ -1071,6 +1077,45 @@ Alternatively, this could be installed as a docker container, and then you could
    #+begin_src emacs-lisp
      (setq compilation-scroll-output t)
    #+end_src
+
+** Rust
+Setup rustic and lsp for Rust programming
+
+For this to work, you need rust-analyzer installed. The easiest method is to use rustup:
+#+begin_src sh :tangle no
+  rustup component add rust-analyzer
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package rustic
+  :ensure
+  :bind (:map rustic-mode-map
+              ("M-j" . lsp-ui-imenu)
+              ("M-?" . lsp-find-references)
+              ("C-c C-c l" . flycheck-list-errors)
+              ("C-c C-c a" . lsp-execute-code-action)
+              ("C-c C-c r" . lsp-rename)
+              ("C-c C-c q" . lsp-workspace-restart)
+              ("C-c C-c Q" . lsp-workspace-shutdown)
+              ("C-c C-c s" . lsp-rust-analyzer-status)
+              ([tab] . company-indent-or-complete-common))
+  :config
+  ;; uncomment for less flashiness
+  ;; (setq lsp-eldoc-hook nil)
+  ;; (setq lsp-enable-symbol-highlighting nil)
+  ;; (setq lsp-signature-auto-activate nil)
+  (setq lsp-rust-analyzer-server-display-inlay-hints t)
+  (setq lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
+  (setq lsp-rust-analyzer-display-chaining-hints t)
+  (setq lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
+  (setq lsp-rust-analyzer-display-closure-return-type-hints t)
+  (setq lsp-rust-analyzer-display-parameter-hints nil)
+  (setq lsp-rust-analyzer-display-reborrow-hints nil)
+  ;; comment to disable rustfmt on save
+  (setq rustic-format-on-save t))
+
+#+end_src
+
 * Yaml
 #+begin_src emacs-lisp
   (use-package yaml-mode
