@@ -1,4 +1,7 @@
 # -*- eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t); -*-
+:PROPERTIES:
+:ID:       C6F07644-D261-483C-8296-6EA8F133C481
+:END:
 
 #+TITLE: Emacs Literate Configuration
 #+AUTHOR: Giles Paterson
@@ -498,6 +501,15 @@ point reaches the beginning or end of the buffer, stop there."
     (defun gp/list-note-files ()
       "Get list of org files in my notes directory"
       (directory-files-recursively "~/Dropbox/org/notes/" "\\`[^.].*\\.org\\'"))
+
+    (defun gp/org-backlinks ()
+      "Search for backlinks to current entry."
+      (interactive)
+      (let ((link (condition-case nil
+                      (org-id-store-link)
+                    (error "Unable to create a link to here"))))
+        (org-occur-in-agenda-files (regexp-quote link))))
+
     :custom
     (org-src-tab-acts-natively t)
     (org-src-fontify-natively t) ;; native src block fontification
