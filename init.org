@@ -693,13 +693,18 @@ I've also created a template for notes - it uses a function to create a new note
 
        (setq org-capture-templates
              '(
-               ("t" "Todo"
-                entry (file+headline "~/Dropbox/org/todo.org" "Tasks")
-                "* TODO [#B] %?")
-               ("n" "Note"
-                entry (file (lambda () (gp/capture-note-file "~/Dropbox/org/notes")))
-                "* %?\n%U")
-               ))
+               ("t"    ; key
+                "Todo" ; description
+                entry  ; type
+                (file+headline "~/Dropbox/org/todo.org" "Tasks") ; target
+                "* TODO [#B] %?" ;template
+                )
+               ("n"    ; key
+                "Note" ; description
+                entry  ; type
+                (file (lambda () (gp/capture-note-file "~/Dropbox/org/notes"))) ; target
+                "* %? %(org-set-tags-command) \n%U" ; template
+                )))
        )
    #+end_src
 
