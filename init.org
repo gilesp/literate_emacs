@@ -494,10 +494,12 @@ point reaches the beginning or end of the buffer, stop there."
 :ID:       66E848BA-D50A-427B-8660-1FCAD5A8FF8B
 :END:
 #+begin_src emacs-lisp
-  (setq org-startup-with-inline-images t)
+
   (use-package org
+    :defer t
     :hook ((org-mode . visual-line-mode)
-           (org-mode . variable-pitch-mode)) ;; enable a mix of proportional and fixed width fonts.
+           (org-mode . variable-pitch-mode)
+           (org-babel-after-execute . org-display-inline-images)) ;; enable a mix of proportional and fixed width fonts.
     :bind (("C-c l" . org-store-link))
     :init
     (defun gp/list-note-files ()
@@ -513,6 +515,7 @@ point reaches the beginning or end of the buffer, stop there."
         (org-occur-in-agenda-files (regexp-quote link))))
 
     :custom
+    (org-startup-with-inline-images t)
     (org-src-tab-acts-natively t)
     (org-src-fontify-natively t) ;; native src block fontification
     (org-src-window-setup 'current-window) ;; edit src blocks in place, rather than a new window
@@ -536,8 +539,6 @@ point reaches the beginning or end of the buffer, stop there."
     ;; automatically indent headings and paragraphs
     (org-startup-indented t)
     :config
-      (progn
-        (add-hook 'org-babel-after-execute-hook 'org-display-inline-images))
       (org-id-update-id-locations)
     )
 
