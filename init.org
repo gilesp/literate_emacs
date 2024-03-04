@@ -494,13 +494,12 @@ point reaches the beginning or end of the buffer, stop there."
 :ID:       66E848BA-D50A-427B-8660-1FCAD5A8FF8B
 :END:
 #+begin_src emacs-lisp
-
   (use-package org
-    :defer t
+   ;; :defer t
     :hook ((org-mode . visual-line-mode)
            (org-mode . variable-pitch-mode)
-           (org-babel-after-execute . org-display-inline-images)) ;; enable a mix of proportional and fixed width fonts.
-    :bind (("C-c l" . org-store-link))
+           (org-babel-after-execute . org-display-inline-images))
+    :mode (("\\.org$" . org-mode))
     :init
     (defun gp/list-note-files ()
       "Get list of org files in my notes directory"
@@ -513,7 +512,6 @@ point reaches the beginning or end of the buffer, stop there."
                       (org-id-store-link)
                     (error "Unable to create a link to here"))))
         (org-occur-in-agenda-files (regexp-quote link))))
-
     :custom
     (org-startup-with-inline-images t)
     (org-src-tab-acts-natively t)
@@ -523,12 +521,11 @@ point reaches the beginning or end of the buffer, stop there."
     (org-confirm-babel-evaluate nil)
     (org-indent-indentation-per-level 2)
     (org-adapt-indentation nil)
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     (append org-babel-load-languages
-             '((dot . t)))) ;; enable graphviz src blocks
-    (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
-
+    ;; (org-babel-do-load-languages
+    ;;  'org-babel-load-languages
+    ;;  (append org-babel-load-languages
+    ;;          '((dot . t)))) ;; enable graphviz src blocks
+    ;; (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
     ;; Make note files searchable without just adding them to agenda files, and slowing everything down.
     (org-agenda-text-search-extra-files (gp/list-note-files))
 
@@ -539,14 +536,32 @@ point reaches the beginning or end of the buffer, stop there."
     ;; automatically indent headings and paragraphs
     (org-startup-indented t)
     :config
-      (org-id-update-id-locations)
+    ;; In order for variable-pitch-mode to work properly, I need to set fixed pitch fonts for various org faces:
+    (custom-theme-set-faces
+     'user
+     '(org-block ((t (:inherit fixed-pitch))))
+     '(org-checkbox ((t (:inherit fixed-pitch))))
+     '(org-code ((t (:inherit (shadow fixed-pitch)))))
+     '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+     '(org-formula ((t (:inherit (fixed-pitch)))))
+     '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+     '(org-property-value ((t (:inherit fixed-pitch))) t)
+     '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+     '(org-table ((t (:inherit fixed-pitch))))
+     '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+     '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
+    ;; (org-id-update-id-locations) ;; This line breaks org mode in emacs 30!
     )
+#+end_src
 
+It looks like I was using org-contrib to get org babel shell support, but I don't know if I still need that. org-contrib pulls in a lot of outdated stuff, so I'm disabling this for now.
+#+begin_src emacs-lisp :tangle no
+  ;; what do I get from org-contrib?
   (use-package org-contrib
     :after org)
 
-  (require 'ob-dot) ;; have to do this for some reason, otherwise babel can't handle dot.
-  ;; would be good to be able to do it via use-package
+    ;; ;; (require 'ob-dot) ;; have to do this for some reason, otherwise babel can't handle dot.
+    ;; would be good to be able to do it via use-package
 
   (use-package ob-shell
     :ensure org-contrib
@@ -559,52 +574,30 @@ point reaches the beginning or end of the buffer, stop there."
     (org-babel-do-load-languages
      'org-babel-load-languages
      (append org-babel-load-languages
-     '(
-       (sh . t)
-       (bash . t)
-       )))
+             '(
+               (sh . t)
+               (bash . t)
+               )))
     )
-
 #+end_src
 
-#+RESULTS:
 
 Let's make org-mode have dyanmic wrapping, and center it in the frame so that it works a bit more like a typical word processor.
 
-For this, I make use of [[https://elpa.gnu.org/packages/adaptive-wrap.html][adaptive-wrap]], [[https://www.emacswiki.org/emacs/VisualLineMode][visual-line-mode]], [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]] and [[https://github.com/mpwang/perfect-margin][perfect-margin]], then text behaves as if you'd used M-q but without actually adding line breaks to the source text.
-
-I'm no longer using perfect-margin et al as it would act globally, no matter what I tried. So I'm using [[https://github.com/rnkn/olivetti][olivetti mode]] instead.
+For this, I make use of [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]] , then text behaves as if you'd used M-q but without actually adding line breaks to the source text.
 
 #+begin_src emacs-lisp
-  ;; (use-package adaptive-wrap
-  ;;   :diminish adaptive-wrap-prefix-mode
-  ;;   :hook (org-mode . adaptive-wrap-prefix-mode))
+  (use-package visual-fill-column
+    :diminish
+    :hook (org-mode . visual-fill-column-mode)
+    :custom
+    (visual-fill-column-width 120)
+    (visual-fill-column-center-text t))
+#+end_src
 
-  ;; (use-package visual-fill-column
-  ;;   :diminish
-  ;;   :hook (visual-line-mode . visual-fill-column-mode)
-  ;;   :custom
-  ;;   (visual-fill-column-width 80))
+Previously I used  [[https://github.com/rnkn/olivetti][olivetti mode]] instead, but this should be a lighter weight approach.
 
-  ;; ;; centre the org-mode area in the frame.
-  ;; (use-package perfect-margin
-  ;;   :diminish
-  ;;   :hook (org-mode . perfect-margin-mode)
-  ;;   :custom
-  ;;   (perfect-margin-visible-width 80)
-  ;;   :init
-  ;;   (defcustom perfect-margin-ignore-regexps
-  ;;     '("^minibuf" "^[*]" "^magit" "^COMMIT_")
-  ;;     "List of strings to determine if window is ignored.
-  ;; Each string is used as regular expression to match the window buffer name."
-  ;;     :group 'perfect-margin)
-
-  ;;   (defcustom perfect-margin-ignore-filters
-  ;;     '(window-minibuffer-p)
-  ;;     "List of functions to determine if window is ignored.
-  ;; Each function is called with window as its sole arguemnt, returning a non-nil value indicate to ignore the window."
-  ;;     :group 'perfect-margin)
-  ;;   )
+#+begin_src emacs-lisp :tangle no
   (use-package olivetti
     :diminish
     :init
@@ -622,22 +615,6 @@ To make org mode look a bit nicer, I like to use the org-bullets package to repl
     :hook (org-mode . org-bullets-mode))
 #+end_src
 
-In order for variable-pitch-mode to work properly, I need to set fixed pitch fonts for various org faces:
-
-#+begin_src emacs-lisp
-  (custom-theme-set-faces
-     'user
-     '(org-block ((t (:inherit fixed-pitch))))
-     '(org-code ((t (:inherit (shadow fixed-pitch)))))
-     '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-     '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
-     '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-     '(org-property-value ((t (:inherit fixed-pitch))) t)
-     '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-     '(org-table ((t (:inherit fixed-pitch))))
-     '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
-     '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
-#+end_src
 
 ** Toc-org
  Install the =toc-org= package after org mode is loaded. This enables automatic generation of up to
