@@ -126,6 +126,9 @@ This is a literate configuration, meaning that it's an org file with embedded co
  #+end_src
 
 * General Emacs Settings
+:PROPERTIES:
+:ID:       473B06A5-3265-44C2-A20F-977D6586B83A
+:END:
   Make elisp in this file have proper scoping. [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][This Emacswiki article explains it well.]]
 
   I also enable =view-mode=, to make the tangled file read-only, as a reminder that it is auto-generated and shouldn't be manually edited.
@@ -377,24 +380,32 @@ Emacs has a powerful, but confusing, undo model. Undo tree makes it easier to us
 #+end_src
 
 ** Theme
-I like a dark editor, and base16-brewer is what I've got used previously. But now I'm trying a vscode dark theme.
+I like a dark editor, and base16-brewer is what I've got used previously. But now I'm trying modus-vivendi. Previously I used vscode-dark-plus but that doesn't work in emacs 30.
 #+begin_src emacs-lisp
-  (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes"))
-  (load-theme 'vscode-dark-plus t)
-  ;; Remove the border around the TODO word on org-mode files
-  (setq vscode-dark-plus-box-org-todo nil)
+  (load-theme 'modus-vivendi t)
+  ;; (use-package vscode-dark-plus-theme
+  ;;   :ensure t
+  ;;   :config
+  ;;   (load-theme 'vscode-dark-plus t))
+  ;; ;; (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes"))
+  ;; (load-theme 'vscode-dark-plus t)
+  ;; ;; Remove the border around the TODO word on org-mode files
+  ;; (setq vscode-dark-plus-box-org-todo nil)
 
-  ;; Do not set different heights for some org faces
-  (setq vscode-dark-plus-scale-org-faces nil)
+  ;; ;; Do not set different heights for some org faces
+  ;; (setq vscode-dark-plus-scale-org-faces nil)
 #+end_src
 
 *** Mode line
-    I'm using doom-modeline as it looks nice and is pretty customisable. It depends on =all-the-icons= so you need to run =M-x all-the-icons-install-fonts= to make sure the fonts are installed.
+    I'm using doom-modeline as it looks nice and is pretty customisable. +It depends on =all-the-icons= so you need to run =M-x all-the-icons-install-fonts= to make sure the fonts are installed.+
+
+    Now it seems to depend on ~nerd-icons~ so you need to run ~M-x nerd-icons-install-fonts~ instead.
 #+begin_src emacs-lisp
   (use-package doom-modeline
     :ensure t
     :custom
     (column-number-mode t)
+    (doom-modeline-project-detection 'project)
     :init (doom-modeline-mode 1))
 #+end_src
 
