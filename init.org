@@ -23,7 +23,6 @@
   - [[#diminish][Diminish]]
   - [[#todo-garbage-collection-again][TODO: Garbage Collection (again)]]
   - [[#personal-information][Personal Information]]
-  - [[#hack---bug-fix][HACK - bug Fix!]]
   - [[#fix-defaults][Fix defaults]]
   - [[#automatically-revert-buffers][Automatically Revert Buffers]]
   - [[#tabs][Tabs]]
@@ -186,16 +185,6 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
  (setq user-full-name "Giles Paterson"
        user-mail-address "giles@vurt.uk")
  #+end_src
-** HACK - bug Fix!
-There's a bug in emacs on MacOs where it doesn't think svg is a valid image type - this breaks certain modes that try to load SVGs for icons etc.
-
-There's some info here about it: https://github.com/caldwell/build-emacs/issues/126
-
-Until I've got a release of emacs 29 running, I'll have to use the following workaround:
-
-#+begin_src emacs-lisp
-  (add-to-list 'image-types 'svg)
-#+end_src
 
 ** Fix defaults
  Reset some emacs defaults that date from prehistoric times
