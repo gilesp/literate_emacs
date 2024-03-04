@@ -67,6 +67,7 @@
   - [[#treemacs][Treemacs]]
   - [[#javascriptweb-development-lsp][Javascript/web development (lsp?)]]
   - [[#java][Java]]
+    - [[#cucumber-tests][Cucumber tests]]
   - [[#rust][Rust]]
 - [[#yaml][Yaml]]
 - [[#restclient][Restclient]]
@@ -1078,6 +1079,11 @@ Alternatively, this could be installed as a docker container, and then you could
      (setq compilation-scroll-output t)
    #+end_src
 
+*** Cucumber tests
+#+begin_src emacs-lisp
+  (use-package feature-mode
+    :mode (("\\.feature\\'" . feature-mode)))
+#+end_src
 ** Rust
 Setup rustic and lsp for Rust programming
 
