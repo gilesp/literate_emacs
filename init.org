@@ -416,12 +416,14 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
 
 #+begin_src emacs-lisp
   ;; (defvar gp/fixed-width-font "Cascadia Code 14")
-  (defvar gp/fixed-width-font "Fira Code 13")
-  (defvar gp/variable-width-font "Roboto Light 15")
+  (defvar gp/fixed-width-font "Fira Code")
+  (defvar gp/fixed-width-weight 'medium)
+  (defvar gp/fixed-width-height 140) ;; 1/10ths of pt (i.e. 14pt)
+  (defvar gp/variable-width-font "Roboto")
 
-  (set-face-attribute 'default nil :font gp/fixed-width-font)
-  (set-face-attribute 'fixed-pitch nil :font gp/fixed-width-font)
-  (set-face-attribute 'variable-pitch nil :font gp/variable-width-font)
+  (set-face-attribute 'default nil :font gp/fixed-width-font :weight gp/fixed-width-weight :height gp/fixed-width-height)
+  (set-face-attribute 'fixed-pitch nil :font gp/fixed-width-font :weight gp/fixed-width-weight :height gp/fixed-width-height)
+  (set-face-attribute 'variable-pitch nil :font gp/variable-width-font :weight 'light :height 170)
 
   (dolist (face '(default fixed-pitch))
     (set-face-attribute `,face nil :font gp/fixed-width-font))
