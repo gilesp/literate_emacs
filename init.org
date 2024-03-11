@@ -49,7 +49,7 @@
   - [[#toc-org][Toc-org]]
   - [[#org-capture][Org Capture]]
   - [[#org-protocol][Org Protocol]]
-  - [[#org-tree-slide][org-tree-slide]]
+  - [[#org-present][org-present]]
 - [[#markdown][Markdown]]
 - [[#completion-framework][Completion Framework]]
   - [[#ivy][Ivy]]
@@ -496,64 +496,65 @@ point reaches the beginning or end of the buffer, stop there."
 :ID:       66E848BA-D50A-427B-8660-1FCAD5A8FF8B
 :END:
 #+begin_src emacs-lisp
-  (use-package org
-   ;; :defer t
-    :hook ((org-mode . visual-line-mode)
-           (org-mode . variable-pitch-mode)
-           (org-babel-after-execute . org-display-inline-images))
-    :mode (("\\.org$" . org-mode))
-    :init
-    (defun gp/list-note-files ()
-      "Get list of org files in my notes directory"
-      (directory-files-recursively "~/Dropbox/org/notes/" "\\`[^.].*\\.org\\'"))
+    (use-package org
+     ;; :defer t
+      :hook ((org-mode . visual-line-mode)
+             (org-mode . variable-pitch-mode)
+             (org-babel-after-execute . org-display-inline-images))
+      :mode (("\\.org$" . org-mode))
+      :init
+      (defun gp/list-note-files ()
+        "Get list of org files in my notes directory"
+        (directory-files-recursively "~/Dropbox/org/notes/" "\\`[^.].*\\.org\\'"))
 
-    (defun gp/org-backlinks ()
-      "Search for backlinks to current entry."
-      (interactive)
-      (let ((link (condition-case nil
-                      (org-id-store-link)
-                    (error "Unable to create a link to here"))))
-        (org-occur-in-agenda-files (regexp-quote link))))
-    :custom
-    (org-startup-with-inline-images t)
-    (org-src-tab-acts-natively t)
-    (org-src-fontify-natively t) ;; native src block fontification
-    (org-src-window-setup 'current-window) ;; edit src blocks in place, rather than a new window
-    (org-hide-emphasis-markers t) ;;actually emphasise text (e.g. show as italic instead of /italic/)
-    (org-confirm-babel-evaluate nil)
-    (org-indent-indentation-per-level 2)
-    (org-adapt-indentation nil)
-    ;; (org-babel-do-load-languages
-    ;;  'org-babel-load-languages
-    ;;  (append org-babel-load-languages
-    ;;          '((dot . t)))) ;; enable graphviz src blocks
-    ;; (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
-    ;; Make note files searchable without just adding them to agenda files, and slowing everything down.
-    (org-agenda-text-search-extra-files (gp/list-note-files))
+      (defun gp/org-backlinks ()
+        "Search for backlinks to current entry."
+        (interactive)
+        (let ((link (condition-case nil
+                        (org-id-store-link)
+                      (error "Unable to create a link to here"))))
+          (org-occur-in-agenda-files (regexp-quote link))))
+      :custom
+      (org-startup-with-inline-images t)
+      (org-src-tab-acts-natively t)
+      (org-src-fontify-natively t) ;; native src block fontification
+      (org-src-window-setup 'current-window) ;; edit src blocks in place, rather than a new window
+      (org-hide-emphasis-markers t) ;;actually emphasise text (e.g. show as italic instead of /italic/)
+      (org-confirm-babel-evaluate nil)
+      (org-indent-indentation-per-level 2)
+      (org-adapt-indentation nil)
+      ;; (org-babel-do-load-languages
+      ;;  'org-babel-load-languages
+      ;;  (append org-babel-load-languages
+      ;;          '((dot . t)))) ;; enable graphviz src blocks
+      ;; (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
+      ;; Make note files searchable without just adding them to agenda files, and slowing everything down.
+      (org-agenda-text-search-extra-files (gp/list-note-files))
 
-    ;; use uuid for links
-    (org-id-link-to-org-use-id t)
-    (org-id-extra-files 'org-agenda-text-search-extra-files)
+      ;; use uuid for links
+      (org-id-link-to-org-use-id t)
+      (org-id-extra-files 'org-agenda-text-search-extra-files)
 
-    ;; automatically indent headings and paragraphs
-    (org-startup-indented t)
-    :config
-    ;; In order for variable-pitch-mode to work properly, I need to set fixed pitch fonts for various org faces:
-    (custom-theme-set-faces
-     'user
-     '(org-block ((t (:inherit fixed-pitch))))
-     '(org-checkbox ((t (:inherit fixed-pitch))))
-     '(org-code ((t (:inherit (shadow fixed-pitch)))))
-     '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-     '(org-formula ((t (:inherit (fixed-pitch)))))
-     '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-     '(org-property-value ((t (:inherit fixed-pitch))) t)
-     '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-     '(org-table ((t (:inherit fixed-pitch))))
-     '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
-     '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
-    ;; (org-id-update-id-locations) ;; This line breaks org mode in emacs 30!
-    )
+      ;; automatically indent headings and paragraphs
+      (org-startup-indented t)
+      :config
+      ;; In order for variable-pitch-mode to work properly, I need to set fixed pitch fonts for various org faces:
+      (custom-theme-set-faces
+       'user
+       '(org-block ((t (:inherit fixed-pitch))))
+       '(org-checkbox ((t (:inherit fixed-pitch))))
+       '(org-code ((t (:inherit (shadow fixed-pitch)))))
+       '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+       '(org-formula ((t (:inherit (fixed-pitch)))))
+       '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+       '(org-property-value ((t (:inherit fixed-pitch))) t)
+       '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+       '(org-table ((t (:inherit fixed-pitch))))
+       '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+       '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
+       '(nxml-text ((t (:inherit (fixed-pitch))))))
+      ;; (org-id-update-id-locations) ;; This line breaks org mode in emacs 30!
+      )
 #+end_src
 
 It looks like I was using org-contrib to get org babel shell support, but I don't know if I still need that. org-contrib pulls in a lot of outdated stuff, so I'm disabling this for now.
@@ -728,14 +729,70 @@ I've also created a template for notes - it uses a function to create a new note
    #+end_src
 
 
-** org-tree-slide
-For giving presentations with org mode
-#+begin_src emacs-lisp
-  (use-package org-tree-slide
-    :bind (("<f8>" . org-tree-slide-mode)
-           ("S-<f8>" . org-tree-slide-skip-done-toggle)))
+** org-present
 
+For giving presentations with org mode. This is all taken from the System Crafters guide: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
+
+#+begin_src emacs-lisp
+  (use-package org-present
+    :init
+    (defun gp/org-present-prepare-slide (buffer-name heading)
+      ;; Show only top-level headlines
+      (org-overview)
+
+      ;; Unfold the current entry
+      (org-show-entry)
+
+      ;; Show only direct sub headings of the slide but don't expand them
+      (org-show-children))
+
+    (defun gp/org-present-start ()
+      ;; Tweak font sizes
+      (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
+                                         (header-line (:height 4.0) variable-pitch)
+                                         (org-document-title (:height 1.75) org-document-title)
+                                         (org-code (:height 1.55) org-code)
+                                         (org-verbatim (:height 1.55) org-verbatim)
+                                         (org-block (:height 1.25) org-block)
+                                         (org-block-begin-line (:height 0.7) org-block)))
+
+      ;; Set a blank header line string to create blank space at the top
+      (setq header-line-format " ")
+
+      ;; disable highlighting the current line
+      (hl-line-mode -1)
+
+      ;; hide the cursor
+      ;;(org-present-hide-cursor)
+      (setq-local cursor-type nil)
+
+      ;; read only mode
+      (org-present-read-only))
+
+    (defun gp/org-present-end ()
+      ;; Reset font customizations
+      (setq-local face-remapping-alist '((default variable-pitch default)))
+
+      ;; Clear the header line string so that it isn't displayed
+      (setq header-line-format nil)
+
+      ;; enable highlighting the current line
+      (hl-line-mode)
+
+      ;; show the cursor again
+      ;;(org-present-show-cursor)
+      (setq-local cursor-type 'box)
+
+      ;; read write mode
+      (org-present-read-write))
+
+    :hook ((org-present-mode . gp/org-present-start)
+           (org-present-mode-quit . gp/org-present-end)
+           (org-present-after-navigate-functions . gp/org-present-prepare-slide))
+    )
 #+end_src
+
+
 * Markdown
 Sometimes I need to edit markdown, so here's how to configure [[https://github.com/jrblevin/markdown-mode][markdown-mode]].
 For README.md files, use github flavoured markdown, otherwise use normal markdown mode.
