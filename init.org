@@ -510,7 +510,7 @@ point reaches the beginning or end of the buffer, stop there."
     :init
     (defun gp/list-note-files ()
       "Get list of org files in my notes directory"
-      (directory-files-recursively "~/Dropbox/org/notes/" "\\`[^.].*\\.org\\'"))
+      (directory-files-recursively "~/Documents/syncthing/org/notes/" "\\`[^.].*\\.org\\'"))
 
     (defun gp/org-backlinks ()
       "Search for backlinks to current entry."
@@ -682,13 +682,13 @@ I've also created a template for notes - it uses a function to create a new note
                ("t"    ; key
                 "Todo" ; description
                 entry  ; type
-                (file+headline "~/Dropbox/org/todo.org" "Tasks") ; target
+                (file+headline "~/Documents/syncthing/org/todo.org" "Tasks") ; target
                 "* TODO [#B] %?" ;template
                 )
                ("n"    ; key
                 "Note" ; description
                 entry  ; type
-                (file (lambda () (gp/capture-note-file "~/Dropbox/org/notes"))) ; target
+                (file (lambda () (gp/capture-note-file "~/Documents/syncthing/org/notes"))) ; target
                 "* %? %(org-set-tags-command) \n%U" ; template
                 )))
        )
@@ -705,7 +705,7 @@ I've also created a template for notes - it uses a function to create a new note
     ;; open agenda in current window
     (org-agenda-window-setup (quote current-window))
     ;; file to save todo items
-    (org-agenda-files (quote ("~/Dropbox/org/todo.org")))
+    (org-agenda-files (quote ("~/Documents/syncthing/org/todo.org")))
     )
 #+end_src
 ** Org Protocol
