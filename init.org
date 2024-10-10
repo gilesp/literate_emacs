@@ -503,76 +503,85 @@ point reaches the beginning or end of the buffer, stop there."
 :END:
 
 #+begin_src emacs-lisp
-    (use-package org
-     ;; :defer t
-      :hook ((org-mode . visual-line-mode)
-             (org-mode . variable-pitch-mode)
-             (org-babel-after-execute . org-display-inline-images))
-      :mode (("\\.org$" . org-mode))
-      :init
-      (defun gp/list-note-files ()
-        "Get list of org files in my notes directory"
-        (directory-files-recursively "~/Documents/syncthing/org/notes/" "\\`[^.].*\\.org\\'"))
+  (use-package org
+    ;; :defer t
+    :hook ((org-mode . visual-line-mode)
+           (org-mode . variable-pitch-mode)
+           (org-babel-after-execute . org-display-inline-images))
+    :mode (("\\.org$" . org-mode))
+    :init
+    (defun gp/list-note-files ()
+      "Get list of org files in my notes directory"
+      (directory-files-recursively "~/Documents/syncthing/org/notes/" "\\`[^.].*\\.org\\'"))
 
-      (defun gp/org-backlinks ()
-        "Search for backlinks to current entry."
-        (interactive)
+    (defun gp/org-backlinks ()
+      "Search for backlinks to current entry."
+      (interactive)
         (let ((link (condition-case nil
                         (org-id-store-link)
                       (error "Unable to create a link to here"))))
           (org-occur-in-agenda-files (regexp-quote link))))
 
-      (defun gp/org-id-complete-link ()
-        "Create an id: ink using completion."
-        (concat "id:" (org-id-get-with-outline-path-completion org-refile-targets)))
+    ;; function to provide id: link compeltion based on my org files.
+    (defun gp/org-id-complete-link (&optional arg)
+      "Create an id: ink using completion."
+      (concat "id:" (org-id-get-with-outline-path-completion org-refile-targets)))
+
+    :custom
+
+    (org-startup-with-inline-images t)
+    (org-src-tab-acts-natively t)
+    (org-src-fontify-natively t) ;; native src block fontification
+    (org-src-window-setup 'current-window) ;; edit src blocks in place, rather than a new window
+    (org-hide-emphasis-markers t) ;;actually emphasise text (e.g. show as italic instead of /italic/)
+    (org-confirm-babel-evaluate nil)
+    (org-indent-indentation-per-level 2)
+    (org-adapt-indentation nil)
+    ;; Make note files searchable without just adding them to agenda files, and slowing everything down.
+    (org-agenda-text-search-extra-files (gp/list-note-files))
+    (org-refile-targets '((nil :maxlevel . 9)
+                          (org-agenda-files :maxlevel . 9)
+                          (gp/list-note-files :maxlevel . 2)))
+
+    (org-outline-path-complete-in-steps nil)         ; Refile in a single go
+    (org-refile-use-outline-path t)                  ; Show full paths for refiling
+    ;; use uuid for links
+    (org-id-link-to-org-use-id t)
+    (org-id-extra-files 'org-agenda-text-search-extra-files)
+
+    ;; automatically indent headings and paragraphs
+    (org-startup-indented t)
+
+    :config
+    ;; load more languages for org-babel
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((emacs-lisp . t)
+       (shell      . t)
+       (sql        . t)))
 
 
-      :custom
+    ;; This config sets my completion function to be called when inserting id: links
+    (org-link-set-parameters "id"
+                             :complete 'gp/org-id-complete-link)
 
-      (org-startup-with-inline-images t)
-      (org-src-tab-acts-natively t)
-      (org-src-fontify-natively t) ;; native src block fontification
-      (org-src-window-setup 'current-window) ;; edit src blocks in place, rather than a new window
-      (org-hide-emphasis-markers t) ;;actually emphasise text (e.g. show as italic instead of /italic/)
-      (org-confirm-babel-evaluate nil)
-      (org-indent-indentation-per-level 2)
-      (org-adapt-indentation nil)
-      ;; Make note files searchable without just adding them to agenda files, and slowing everything down.
-      (org-agenda-text-search-extra-files (gp/list-note-files))
-
-      ;; use uuid for links
-      (org-id-link-to-org-use-id t)
-      (org-id-extra-files 'org-agenda-text-search-extra-files)
-
-      ;; automatically indent headings and paragraphs
-      (org-startup-indented t)
-      :config
-      ;; load more languages for org-babel
-      (org-babel-do-load-languages
-       'org-babel-load-languages
-       '((emacs-lisp . t)
-         (shell      . t)
-         (sql        . t)))
-
-      (org-link-set-parameters "id" :complete #'gp/org-id-complete-link) ;; use my completiong function for links
-
-      ;; In order for variable-pitch-mode to work properly, I need to set fixed pitch fonts for various org faces:
-      (custom-theme-set-faces
-       'user
-       '(org-block ((t (:inherit fixed-pitch))))
-       '(org-checkbox ((t (:inherit fixed-pitch))))
-       '(org-code ((t (:inherit (shadow fixed-pitch)))))
-       '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-       '(org-formula ((t (:inherit (fixed-pitch)))))
-       '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-       '(org-property-value ((t (:inherit fixed-pitch))) t)
-       '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-       '(org-table ((t (:inherit fixed-pitch))))
-       '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
-       '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
-       '(nxml-text ((t (:inherit (fixed-pitch))))))
-      ;; (org-id-update-id-locations) ;; This line breaks org mode in emacs 30!
-      )
+    ;; In order for variable-pitch-mode to work properly, I need to set fixed pitch fonts for various org faces:
+    (custom-theme-set-faces
+     'user
+     '(org-block ((t (:inherit fixed-pitch))))
+     '(org-checkbox ((t (:inherit fixed-pitch))))
+     '(org-code ((t (:inherit (shadow fixed-pitch)))))
+     '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+     '(org-formula ((t (:inherit (fixed-pitch)))))
+     '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+     '(org-property-value ((t (:inherit fixed-pitch))) t)
+     '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+     '(org-table ((t (:inherit fixed-pitch))))
+     '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+     '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
+     '(nxml-text ((t (:inherit (fixed-pitch))))))
+    ;; (org-id-update-id-locations) ;; This line breaks org mode in emacs 30!
+    )
 #+end_src
 
 It looks like I was using org-contrib to get org babel shell support, but I don't know if I still need that. org-contrib pulls in a lot of outdated stuff, so I'm disabling this for now.
@@ -661,7 +670,7 @@ I've also created a template for notes - it uses a function to create a new note
    #+begin_src emacs-lisp
      (use-package org-capture
        :ensure nil
-       :after org
+       :after org-agenda
        :defer 1
        :bind (("C-c c" . org-capture))
        :config
@@ -718,6 +727,7 @@ I've also created a template for notes - it uses a function to create a new note
     (org-agenda-window-setup (quote current-window))
     ;; file to save todo items
     (org-agenda-files (quote ("~/Documents/syncthing/org/todo.org")))
+    (add-to-list 'org-agenda-text-search-extra-files '(org-agenda-files :maxlevel . 2))
     )
 #+end_src
 ** Org Protocol
