@@ -49,6 +49,7 @@
   - [[#toc-org][Toc-org]]
   - [[#org-capture][Org Capture]]
   - [[#org-protocol][Org Protocol]]
+  - [[#org-ql][org-ql]]
   - [[#org-present][org-present]]
 - [[#markdown][Markdown]]
 - [[#completion-framework][Completion Framework]]
@@ -500,67 +501,78 @@ point reaches the beginning or end of the buffer, stop there."
 :PROPERTIES:
 :ID:       66E848BA-D50A-427B-8660-1FCAD5A8FF8B
 :END:
+
 #+begin_src emacs-lisp
-  (use-package org
-   ;; :defer t
-    :hook ((org-mode . visual-line-mode)
-           (org-mode . variable-pitch-mode)
-           (org-babel-after-execute . org-display-inline-images))
-    :mode (("\\.org$" . org-mode))
-    :init
-    (defun gp/list-note-files ()
-      "Get list of org files in my notes directory"
-      (directory-files-recursively "~/Documents/syncthing/org/notes/" "\\`[^.].*\\.org\\'"))
+    (use-package org
+     ;; :defer t
+      :hook ((org-mode . visual-line-mode)
+             (org-mode . variable-pitch-mode)
+             (org-babel-after-execute . org-display-inline-images))
+      :mode (("\\.org$" . org-mode))
+      :init
+      (defun gp/list-note-files ()
+        "Get list of org files in my notes directory"
+        (directory-files-recursively "~/Documents/syncthing/org/notes/" "\\`[^.].*\\.org\\'"))
 
-    (defun gp/org-backlinks ()
-      "Search for backlinks to current entry."
-      (interactive)
-      (let ((link (condition-case nil
-                      (org-id-store-link)
-                    (error "Unable to create a link to here"))))
-        (org-occur-in-agenda-files (regexp-quote link))))
-    :custom
-    (org-startup-with-inline-images t)
-    (org-src-tab-acts-natively t)
-    (org-src-fontify-natively t) ;; native src block fontification
-    (org-src-window-setup 'current-window) ;; edit src blocks in place, rather than a new window
-    (org-hide-emphasis-markers t) ;;actually emphasise text (e.g. show as italic instead of /italic/)
-    (org-confirm-babel-evaluate nil)
-    (org-indent-indentation-per-level 2)
-    (org-adapt-indentation nil)
-    ;; Make note files searchable without just adding them to agenda files, and slowing everything down.
-    (org-agenda-text-search-extra-files (gp/list-note-files))
+      (defun gp/org-backlinks ()
+        "Search for backlinks to current entry."
+        (interactive)
+        (let ((link (condition-case nil
+                        (org-id-store-link)
+                      (error "Unable to create a link to here"))))
+          (org-occur-in-agenda-files (regexp-quote link))))
 
-    ;; use uuid for links
-    (org-id-link-to-org-use-id t)
-    (org-id-extra-files 'org-agenda-text-search-extra-files)
+      (defun gp/org-id-complete-link ()
+        "Create an id: ink using completion."
+        (concat "id:" (org-id-get-with-outline-path-completion org-refile-targets)))
 
-    ;; automatically indent headings and paragraphs
-    (org-startup-indented t)
-    :config
-    ;; load more languages for org-babel
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((emacs-lisp . t)
-       (shell      . t)
-       (sql        . t)))
-    ;; In order for variable-pitch-mode to work properly, I need to set fixed pitch fonts for various org faces:
-    (custom-theme-set-faces
-     'user
-     '(org-block ((t (:inherit fixed-pitch))))
-     '(org-checkbox ((t (:inherit fixed-pitch))))
-     '(org-code ((t (:inherit (shadow fixed-pitch)))))
-     '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-     '(org-formula ((t (:inherit (fixed-pitch)))))
-     '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-     '(org-property-value ((t (:inherit fixed-pitch))) t)
-     '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
-     '(org-table ((t (:inherit fixed-pitch))))
-     '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
-     '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
-     '(nxml-text ((t (:inherit (fixed-pitch))))))
-    ;; (org-id-update-id-locations) ;; This line breaks org mode in emacs 30!
-    )
+
+      :custom
+
+      (org-startup-with-inline-images t)
+      (org-src-tab-acts-natively t)
+      (org-src-fontify-natively t) ;; native src block fontification
+      (org-src-window-setup 'current-window) ;; edit src blocks in place, rather than a new window
+      (org-hide-emphasis-markers t) ;;actually emphasise text (e.g. show as italic instead of /italic/)
+      (org-confirm-babel-evaluate nil)
+      (org-indent-indentation-per-level 2)
+      (org-adapt-indentation nil)
+      ;; Make note files searchable without just adding them to agenda files, and slowing everything down.
+      (org-agenda-text-search-extra-files (gp/list-note-files))
+
+      ;; use uuid for links
+      (org-id-link-to-org-use-id t)
+      (org-id-extra-files 'org-agenda-text-search-extra-files)
+
+      ;; automatically indent headings and paragraphs
+      (org-startup-indented t)
+      :config
+      ;; load more languages for org-babel
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((emacs-lisp . t)
+         (shell      . t)
+         (sql        . t)))
+
+      (org-link-set-parameters "id" :complete #'gp/org-id-complete-link) ;; use my completiong function for links
+
+      ;; In order for variable-pitch-mode to work properly, I need to set fixed pitch fonts for various org faces:
+      (custom-theme-set-faces
+       'user
+       '(org-block ((t (:inherit fixed-pitch))))
+       '(org-checkbox ((t (:inherit fixed-pitch))))
+       '(org-code ((t (:inherit (shadow fixed-pitch)))))
+       '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
+       '(org-formula ((t (:inherit (fixed-pitch)))))
+       '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+       '(org-property-value ((t (:inherit fixed-pitch))) t)
+       '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+       '(org-table ((t (:inherit fixed-pitch))))
+       '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+       '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
+       '(nxml-text ((t (:inherit (fixed-pitch))))))
+      ;; (org-id-update-id-locations) ;; This line breaks org mode in emacs 30!
+      )
 #+end_src
 
 It looks like I was using org-contrib to get org babel shell support, but I don't know if I still need that. org-contrib pulls in a lot of outdated stuff, so I'm disabling this for now.
@@ -733,8 +745,42 @@ I've also created a template for notes - it uses a function to create a new note
       '&title='+encodeURIComponent(document.title)+
       '&body='+encodeURIComponent(window.getSelection());
    #+end_src
+** org-ql
+I'm going to try using org-ql and dynamic blocks to provide backlinks in my org notes. This is the approach I describe in my note taking notes (searching_notes.org)
+
+I can insert a dynamic block with C-c C-x x and select "backlinks" from the list. This will add the block and update it, so any links to the current org section will be listed.
 
 
+#+begin_src emacs-lisp
+
+  (use-package org-ql
+    :after org
+    :init
+    (defun org-dblock-write:zorg-backlinks (&rest params)
+      (let ((elements (org-ql-query
+                       :from org-agenda-text-search-extra-files
+                       :where `(link :target ,(org-id-store-link)))))
+        (insert "Backlinks:\n")
+        (dolist (element elements)
+          (insert "- " (org-make-link-string (concat "id:" (org-element-property :ID element))
+                                             (org-element-property :raw-value element))
+                  "\n"))
+        (delete-char -1)))
+
+    ;; Enable inserting the dynamic block with C-x C-x x
+    (defun org-insert-dblock:backlinks ()
+      "Insert a dynamic block backlinks at point."
+      (interactive)
+      (atomic-change-group
+        (org-create-dblock (list :name "zorg-backlinks")))
+      (org-update-dblock))
+
+    (org-dynamic-block-define "backlinks" #'org-insert-dblock:backlinks)
+    ;; update dynamic blocks when saving
+    ;; to ensure backlinks are always up to date.
+    (add-hook 'before-save-hook #'org-update-all-dblocks)
+    )
+#+end_src
 ** org-present
 
 For giving presentations with org mode. This is all taken from the System Crafters guide: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
