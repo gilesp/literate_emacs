@@ -1296,10 +1296,11 @@ And, of course, we can integrate it with org mode:
 This is my custom structurizr mode (available on github at https://github.com/gilesp/structurizr-mode).
 
 #+begin_src emacs-lisp
-    (use-package structurizr-mode
-      :ensure nil
-      :load-path "/Users/gilespaterson/projects/structurizr-mode"
-      :mode ("\\.dsl\\'" . structurizr-mode))
+  `((user :default ,user-login-name))
+  (use-package structurizr-mode
+    :ensure nil
+    :load-path "~/projects/structurizr-mode"
+    :mode ("\\.dsl\\'" . structurizr-mode))
 #+end_src
 
 * SQL Mode (Disabled)
