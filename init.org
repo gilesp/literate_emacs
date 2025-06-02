@@ -17,8 +17,14 @@
   - [[#visibility-settings][Visibility Settings]]
   - [[#table-of-contents][Table of Contents]]
 - [[#early-init][Early Init]]
+  - [[#which-platform-is-this][Which platform is this?]]
+  - [[#basic-frame-window-configuration][Basic frame (window) configuration]]
   - [[#disable-the-tool-bar-and-menu-bar][Disable the tool-bar and menu-bar]]
+  - [[#set-the-frame-size][Set the frame size]]
+  - [[#package-configuration][Package configuration]]
+  - [[#tweak-startup-time-and-garbage-collection][Tweak startup time and garbage collection]]
 - [[#general-emacs-settings][General Emacs Settings]]
+  - [[#ensure-frame-gets-focus][Ensure frame gets focus]]
   - [[#use-package][Use-Package]]
   - [[#diminish][Diminish]]
   - [[#todo-garbage-collection-again][TODO: Garbage Collection (again)]]
@@ -30,12 +36,12 @@
   - [[#disable-backup-files][Disable backup files]]
   - [[#utf-8-all-the-things][UTF-8 all the things!]]
   - [[#unbind-the-pesky-sleep-key][Unbind the pesky sleep key]]
+  - [[#switch-between-windows-easily][Switch between windows easily]]
   - [[#use-y-or-n-instead-of-yes-or-no][Use 'y' or 'n' instead of 'yes' or 'no']]
   - [[#fix-macos-path-nonsense][Fix MacOS Path nonsense]]
   - [[#a-function-to-set-the-framesize-for-streaming][A function to set the framesize for streaming]]
   - [[#enable-recentf-mode-recent-files][Enable recentf mode (recent-files)]]
   - [[#enable-overwriting-selected-text][Enable overwriting selected text]]
-  - [[#disable-audible-bell-use-visual-instead][Disable audible bell, use visual instead]]
   - [[#show-trailing-white-space][Show trailing white space]]
   - [[#highlight-current-line][Highlight current line]]
   - [[#undo-tree][Undo Tree]]
@@ -51,6 +57,9 @@
   - [[#org-protocol][Org Protocol]]
   - [[#org-ql][org-ql]]
   - [[#org-present][org-present]]
+  - [[#org-exporters][Org Exporters]]
+    - [[#markdown-github-flavoured][Markdown (Github Flavoured)]]
+    - [[#typst][Typst]]
 - [[#markdown][Markdown]]
 - [[#completion-framework][Completion Framework]]
   - [[#ivy][Ivy]]
@@ -77,6 +86,7 @@
 - [[#remote-access-with-tramp][Remote access with Tramp]]
 - [[#structurizr-mode][Structurizr Mode]]
 - [[#sql-mode-disabled][SQL Mode (Disabled)]]
+- [[#llm-assistant][LLM assistant]]
 
 * About this file
 This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]]. I've also taken inspiration from https://blog.sumtypeofway.com/posts/emacs-config.html and https://assortedarray.com/posts/my-init-org-setup/.
@@ -88,9 +98,9 @@ This is a literate configuration, meaning that it's an org file with embedded co
 
    I'm using a file variable, added with =M-x add-file-local-variable-prop-line=, to set the eval hook in the first line of this file.
 
-   #+begin_src emacs-lisp :tangle no
+   #+begin_example emacs-lisp
      eval: (add-hook 'after-save-hook (lambda nil (org-babel-tangle)) nil t);
-   #+end_src
+   #+end_example
 
    Alternatively, the file can be manually tangled with =M-x org-babel-tangle= or =C-c C-v t=.
 
@@ -103,31 +113,81 @@ This is a literate configuration, meaning that it's an org file with embedded co
 * Early Init
   Emacs 27 introduced the =early-init.el= file that is loaded very early in the startup process. It's intended for customizing how the package system is initialized, so let's do our package config there:
 
-  #+begin_src emacs-lisp :tangle early-init.el
-    ;;; early-init.el -*- lexical-binding: t; eval: (view-mode -1); -*-
-    (require 'package)
-    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-    (add-to-list 'package-archives '("nongnu" . "https://elpa.nongnu.org/nongnu/") t)
-    (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
-  #+end_src
+  Any code in this section should not depend on a particular package or the emacs frame being in any given state. It's meant for doing initial basic configuration before the frame is created.
 
-  Taking inspiration from [[https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-does-doom-start-up-so-quickly][doom-emacs]], I'm going to bump the garbage collection threshold up during startup to help speed things up. Then we reset it after startup.
-   #+begin_src emacs-lisp :tangle early-init.el
-     (defvar gp/gc-cons-threshold 16777216) ;; 16mb
-     (setq gc-cons-threshold most-positive-fixnum
-           gc-cons-percentage 0.6)
-     (add-hook 'emacs-startup-hook
-               (lambda ()
-                 (setq gc-cons-threshold gp/gc-cons-threshold
-                       gc-cons-percentage 0.1)))
+** Which platform is this?
+  This would be a good place to set any device or location specific flags. For example, if I need different config at home compared to work, then I could detect the location/machine here and set an appropriate variable to be used in the rest of the config.
+#+begin_src emacs-listp :tangle early-init.el
+  (defconst gp/env-macos (eq system-type 'darwin))
+#+end_src
 
-   #+end_src
+** Basic frame (window) configuration
+By doing basic frame config here, then it will apply to the initial frame and all subsequent frames.
+
+Allow setting frame size by pixels, and also prevent emacs from resizing the frame when we change font sizes.
+#+begin_src emacs-lisp :tangle early-init.el
+  (setq frame-resize-pixelwise t) ;; use pixels to specify frame size
+  (setq frame-inhibit-implied-resize 'force) ;; don't resize frame if font size changes
+  (setq frame-title-format '("%b")) ;; current buffer name
+  (setq ring-bell-function 'ignore) ;; use visual instead of audible bell
+  (setq visible-bell t)
+  (setq inhibit-splash-screen t)
+  (setq inhibit-startup-screen t)      ;; No need for a startup screen
+  (setq initial-scratch-message nil)   ;; or to tell me what the scratch buffer is
+  (setq inhibit-startup-echo-area-message user-login-name)
+  (setq inhibit-startup-message t)
+#+end_src
 
 ** Disable the tool-bar and menu-bar
  #+begin_src emacs-lisp :tangle early-init.el
    (tool-bar-mode -1)
    (menu-bar-mode -1)
  #+end_src
+
+** Set the frame size
+An emacs Frame is what most would call a window; Emacs predates commonly accepted GUI terms.
+
+#+begin_src emacs-lisp :tangle early-init.el
+  (dolist (variable '(initial-frame-alist default-frame-alit))
+    (set variable `((width . (text-pixels . 800))
+                    (height . (text-pixels . 900)))))
+#+end_src
+
+** Package configuration
+  #+begin_src emacs-lisp :tangle early-init.el
+    ;;; early-init.el -*- lexical-binding: t; eval: (view-mode -1); -*-
+    (require 'package)
+    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+    (add-to-list 'package-archives '("nongnu" . "https://elpa.nongnu.org/nongnu/") t)
+    (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
+
+    (setq package-enable-at-startup t) ;; enable package cache to initialise installed packages
+  #+end_src
+
+** Tweak startup time and garbage collection
+  Taking inspiration from [[https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-does-doom-start-up-so-quickly][doom-emacs]], I'm going to bump the garbage collection threshold up during startup to help speed things up. Then we reset it after startup.
+   #+begin_src emacs-lisp :tangle early-init.el
+     ;; (defvar gp/gc-cons-threshold 16777216) ;; 16mb
+     (defvar gp/gc-cons-threshold (* 100 100 8))
+     (defvar gp/file-name-handler-alist file-name-handler-alist)
+     (defvar gp/vc-handled-backends vc-handled-backends)
+
+     ;; set initial values high to speed up startup
+     (setq gc-cons-threshold most-positive-fixnum
+           gc-cons-percentage 0.6)
+
+     (setq file-name-handler-alist nil
+           vc-handled-backends nil)
+
+     ;; ensure normal values are set after startup
+     (add-hook 'emacs-startup-hook
+               (lambda ()
+                 (setq gc-cons-threshold gp/gc-cons-threshold
+                       gc-cons-percentage 0.1
+                       file-name-handler-alist gp/file-name-handler-alist
+                       vc-handled-backends gp/vc-handled-backends)))
+
+   #+end_src
 
 * General Emacs Settings
 :PROPERTIES:
@@ -141,13 +201,25 @@ This is a literate configuration, meaning that it's an org file with embedded co
 ;;; init.el -*- lexical-binding: t ; eval: (view-mode -1); -*-
 #+end_src
 
+** Ensure frame gets focus
+On MacOS, the initial emacs frame doesn't get focus automatically, meaning it appears behind the terminal window I've just launched it from. This should sort that.
+
+#+begin_src emacs-lisp
+  (if gp/env-macos
+      (select-frame-set-input-focus (selected-frame)))
+#+end_src
+
+
 ** Use-Package
    I like to use [[https://github.com/jwiegley/use-package][use-package]] to keep things tidy and speedy on startup, so this makes sure it's available. I set it to defer loading packages unless told otherwise, this speeds up initialisation.
 
  #+begin_src emacs-lisp
-   (unless (package-installed-p 'use-package)
-     (package-refresh-contents)
-     (package-install 'use-package))
+   (when (< emacs-major-version 29)
+     (unless (package-installed-p 'use-package)
+       (unless package-archive-contents
+         (package-refresh-contents))
+       (package-install 'use-package)))
+
    (setq use-package-always-ensure t
          use-package-ensure-all t
          use-package-always-defer t)
@@ -155,13 +227,22 @@ This is a literate configuration, meaning that it's an org file with embedded co
    (require 'use-package-ensure)
  #+end_src
 
- I like to make sure all my packages are up to date, so I use auto-package-update.
+ Hide package installation warnings, since they're usually not important.
  #+begin_src emacs-lisp
-   (use-package auto-package-update
-     :custom
-     (auto-package-update-delete-old-versions t)
-     :init
-     (auto-package-update-maybe))
+   ;; hide package installation warnings
+   (add-to-list 'display-buffer-alist
+                '("\\`\\*\\(Warnings\\|Compile-Log\\)\\*\\'"
+                  (display-buffer-no-window)
+                  (allow-no-window . t)))
+ #+end_src
+
+   I like to make sure all my packages are up to date, so I use auto-package-update.
+   #+begin_src emacs-lisp
+     (use-package auto-package-update
+       :custom
+       (auto-package-update-delete-old-versions t)
+       :init
+       (auto-package-update-maybe))
  #+end_src
 ** Diminish
 Use diminish so that use-package can hide modes from the mode line when we ask it to.
@@ -197,13 +278,10 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
  Reset some emacs defaults that date from prehistoric times
 
  #+begin_src emacs-lisp
-   (setq inhibit-startup-screen t)      ;; No need for a startup screen
-   (setq initial-scratch-message nil)   ;; or to tell me what the scratch buffer is
-   (setq inhibit-startup-echo-area-message t)
-   (setq inhibit-startup-message t)
    (setq sentence-end-double-space nil) ;; Who the hell does this in 2021?
    (setq mark-even-if-inactive nil)     ;; Fix undo in command affecting the mark.
    (setq kill-whole-line t)             ;; Let C-k delete the whole line.
+   (setq native-comp-async-report-warnings-errors nil) ;; don't show native complilation warnings
  #+end_src
 
 ** Automatically Revert Buffers
@@ -254,6 +332,20 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
   (global-unset-key [(control x)(control z)])
 #+end_src
 
+** Switch between windows easily
+switch-window enables selecting windows by number (or letter). You can jump directly to a window rather than cycling through them or navigating up/down/left/right with windmove-*
+
+#+begin_src emacs-lisp
+  (use-package switch-window
+    :bind (("C-x o" . switch-window)
+           ("C-x 1" . switch-window-then-maximize)
+           ("C-x 2" . switch-window-then-split-below)
+           ("C-x 3" . switch-window-then-split-right)
+           ("C-x 0" . switch-window-then-delete)))
+#+end_src
+
+When there are more than two windows present, it will overlay the window with a number so you can jump directly to it. A similar process is enabled when splitting.
+
 ** Use 'y' or 'n' instead of 'yes' or 'no'
 #+begin_src emacs-lisp
   (fset 'yes-or-no-p 'y-or-n-p)
@@ -267,12 +359,11 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
 This library solves this problem by copying important environment variables from the user's shell: it works by asking your shell to print out the variables of interest, then copying them into the Emacs environment.
 
 #+begin_src emacs-lisp
-  (defconst *is-a-mac* (eq system-type 'darwin))
   (use-package exec-path-from-shell
     :ensure t)
   ;;Later on, after loading exec-path-from-shell package
 
-  (if *is-a-mac*
+  (if gp/env-macos
      (add-hook 'after-init-hook 'exec-path-from-shell-initialize))
 #+end_src
 
@@ -316,7 +407,7 @@ This library solves this problem by copying important environment variables from
      ; else
      (gp/frame-size-normal)))
 
-   (gp/frame-size-normal)
+   ;; (gp/frame-size-normal)
  #+end_src
 
 ** Enable recentf mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
@@ -334,14 +425,12 @@ I've replaced the recentf-open-files keybinding with counsel-recentf instead.
 
 ** Enable overwriting selected text
 #+begin_src emacs-lisp
-  (delete-selection-mode t)
+  ;; Delete the selected text upon text insertion
+  (use-package delsel
+    :ensure nil ; no need to install it as it is built-in
+    :hook (after-init . delete-selection-mode))
 #+end_src
 
-** Disable audible bell, use visual instead
-#+begin_src emacs-lisp
-  (setq ring-bell-function 'ignore)
-  (setq visible-bell t)
-#+end_src
 
 ** Show trailing white space
    Show white space at the ends of line, to avoid embarassment when comitting something. Then delete them with M-x delete-trailing-whitespace
@@ -509,6 +598,7 @@ point reaches the beginning or end of the buffer, stop there."
            (org-mode . variable-pitch-mode)
            (org-babel-after-execute . org-display-inline-images))
     :mode (("\\.org$" . org-mode))
+    :bind (("C-c l" . org-store-link)) ;;store link to current org section
     :init
     (defun gp/list-note-files ()
       "Get list of org files in my notes directory"
@@ -552,6 +642,7 @@ point reaches the beginning or end of the buffer, stop there."
     ;; automatically indent headings and paragraphs
     (org-startup-indented t)
 
+    (org-export-with-broken-links 'mark) ;;mark broken links in exported output
     :config
     ;; load more languages for org-babel
     (org-babel-do-load-languages
@@ -763,33 +854,41 @@ I can insert a dynamic block with C-c C-x x and select "backlinks" from the list
 
 #+begin_src emacs-lisp
 
-  (use-package org-ql
-    :after org
-    :init
-    (defun org-dblock-write:zorg-backlinks (&rest params)
-      (let ((elements (org-ql-query
-                       :from org-agenda-text-search-extra-files
-                       :where `(link :target ,(org-id-store-link)))))
-        (insert "Backlinks:\n")
-        (dolist (element elements)
-          (insert "- " (org-make-link-string (concat "id:" (org-element-property :ID element))
-                                             (org-element-property :raw-value element))
-                  "\n"))
-        (delete-char -1)))
+    (use-package org-ql
+      :after org
+      :bind ("C-c s" . gp/org-ql-search)
+      :init
+      (defun org-dblock-write:zorg-backlinks (&rest params)
+        (let ((elements (org-ql-query
+                         :from org-agenda-text-search-extra-files
+                         :where `(link :target ,(org-id-store-link)))))
+          (insert "Backlinks:\n")
+          (dolist (element elements)
+            (insert "- " (org-make-link-string (concat "id:" (org-element-property :ID element))
+                                               (org-element-property :raw-value element))
+                    "\n"))
+          (delete-char -1)))
 
-    ;; Enable inserting the dynamic block with C-x C-x x
-    (defun org-insert-dblock:backlinks ()
-      "Insert a dynamic block backlinks at point."
-      (interactive)
-      (atomic-change-group
-        (org-create-dblock (list :name "zorg-backlinks")))
-      (org-update-dblock))
+      ;; Enable inserting the dynamic block with C-x C-x x
+      (defun org-insert-dblock:backlinks ()
+        "Insert a dynamic block backlinks at point."
+        (interactive)
+        (atomic-change-group
+          (org-create-dblock (list :name "zorg-backlinks")))
+        (org-update-dblock))
 
-    (org-dynamic-block-define "backlinks" #'org-insert-dblock:backlinks)
-    ;; update dynamic blocks when saving
-    ;; to ensure backlinks are always up to date.
-    (add-hook 'before-save-hook #'org-update-all-dblocks)
-    )
+      (org-dynamic-block-define "backlinks" #'org-insert-dblock:backlinks)
+      ;; update dynamic blocks when saving
+      ;; to ensure backlinks are always up to date.
+      (add-hook 'before-save-hook #'org-update-all-dblocks)
+
+      :config
+      ;; search my notes with org-ql
+      (defun gp/org-ql-search (query narrow)
+        "Search `org-agenda-text-search-extra-files' with `org-ql-search'."
+        (interactive (read-string "Query: " ))
+        (org-ql-search org-agenda-text-search-extra-files (query) :sort '(date) :super-groups nil :narrow narrow))
+      )
 #+end_src
 ** org-present
 
@@ -853,8 +952,21 @@ For giving presentations with org mode. This is all taken from the System Crafte
            (org-present-after-navigate-functions . gp/org-present-prepare-slide))
     )
 #+end_src
+** Org Exporters
+*** Markdown (Github Flavoured)
 
+#+begin_src emacs-lisp
+  (use-package ox-gfm
+    :defer 3
+    :after org)
+#+end_src
+*** Typst
 
+#+begin_src emacs-lisp
+  (use-package ox-typst
+    :defer 3
+    :after org)
+#+end_src
 * Markdown
 Sometimes I need to edit markdown, so here's how to configure [[https://github.com/jrblevin/markdown-mode][markdown-mode]].
 For README.md files, use github flavoured markdown, otherwise use normal markdown mode.
@@ -1345,4 +1457,42 @@ And set up some sql-mode connections
                                               "@host"
                                               ":port"
                                               "/database")))))
+#+end_src
+
+* LLM assistant
+
+I've started using ollama at work to run a number of code oriented LLMs on a beefy AI server. It'd be good to access these from within Emacs as well as via IntelliJ and the web as we currently do.
+
+I'm going to try the [[https://github.com/s-kostyaev/ellama][ellama]] project to interract with our ollama instances.
+
+#+begin_src emacs-lisp
+  (use-package ellama
+    :bind ("C-c e" . ellama-transient-main-menu)
+    :init
+    (setopt ellama-language "English")
+    (require 'llm-ollama)
+    (setopt ellama-provider
+            (make-llm-ollama
+             :host "hdc-m37-llm-01.service.test.fruugo"
+             :port 11434
+             :chat-model "qwen2.5-coder:7b"
+             :embedding-model "qwen2.5-coder:7b"))
+    (setopt ellama-coding-provider
+            (make-llm-ollama
+             :host "hdc-m37-llm-01.service.test.fruugo"
+             :port 11437
+             :chat-model "codegeex4"
+             :embedding-model "codegeex4"))
+    ;; Naming new sessions with llm
+    (setopt ellama-naming-provider
+           (make-llm-ollama
+             :host "hdc-m37-llm-01.service.test.fruugo"
+             :port 11434
+             :chat-model "qwen2.5-coder:7b"
+             :embedding-model "qwen2.5-coder:7b"
+             :default-chat-non-standard-params '(("stop" . ("\n")))))
+    (setopt ellama-naming-scheme 'ellama-generate-name-by-llm)
+
+    )
+
 #+end_src
