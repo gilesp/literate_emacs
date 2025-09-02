@@ -86,7 +86,7 @@
 - [[#remote-access-with-tramp][Remote access with Tramp]]
 - [[#structurizr-mode][Structurizr Mode]]
 - [[#sql-mode-disabled][SQL Mode (Disabled)]]
-- [[#llm-assistant][LLM assistant]]
+- [[#scheme][Scheme]]
 
 * About this file
 This configuration is inspired by [[https://github.com/vidjuheffex/dotemacs][vidjuheffex's config]] and [[https://github.com/gilbertw1/emacs-literate-starter][gilbertw1's config]]. I've also taken inspiration from https://blog.sumtypeofway.com/posts/emacs-config.html and https://assortedarray.com/posts/my-init-org-setup/.
@@ -1319,40 +1319,21 @@ Setup eglot-java
     :mode (("\\.feature\\'" . feature-mode)))
 #+end_src
 ** Rust
-Setup rustic and lsp for Rust programming
+Setup rust-mode and lsp for Rust programming
 
 For this to work, you need rust-analyzer installed. The easiest method is to use rustup:
 #+begin_src sh :tangle no
   rustup component add rust-analyzer
 #+end_src
 
-#+begin_src emacs-lisp :tangle no
-  (use-package rustic
-  :ensure
-  :bind (:map rustic-mode-map
-              ("M-j" . lsp-ui-imenu)
-              ("M-?" . lsp-find-references)
-              ("C-c C-c l" . flycheck-list-errors)
-              ("C-c C-c a" . lsp-execute-code-action)
-              ("C-c C-c r" . lsp-rename)
-              ("C-c C-c q" . lsp-workspace-restart)
-              ("C-c C-c Q" . lsp-workspace-shutdown)
-              ("C-c C-c s" . lsp-rust-analyzer-status)
-              ([tab] . company-indent-or-complete-common))
-  :config
-  ;; uncomment for less flashiness
-  ;; (setq lsp-eldoc-hook nil)
-  ;; (setq lsp-enable-symbol-highlighting nil)
-  ;; (setq lsp-signature-auto-activate nil)
-  (setq lsp-rust-analyzer-server-display-inlay-hints t)
-  (setq lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
-  (setq lsp-rust-analyzer-display-chaining-hints t)
-  (setq lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
-  (setq lsp-rust-analyzer-display-closure-return-type-hints t)
-  (setq lsp-rust-analyzer-display-parameter-hints nil)
-  (setq lsp-rust-analyzer-display-reborrow-hints nil)
-  ;; comment to disable rustfmt on save
-  (setq rustic-format-on-save t))
+#+begin_src emacs-lisp
+  (use-package rust-mode
+    :ensure t
+    :mode (("\\.rs\\'" . rust-mode))
+    :init
+    (which-function-mode 1)
+    :config
+    (setq rust-format-on-save t))
 
 #+end_src
 
@@ -1459,7 +1440,7 @@ And set up some sql-mode connections
                                               "/database")))))
 #+end_src
 
-* LLM assistant
+ LLM assistant
 
 I've started using ollama at work to run a number of code oriented LLMs on a beefy AI server. It'd be good to access these from within Emacs as well as via IntelliJ and the web as we currently do.
 
@@ -1494,5 +1475,14 @@ I'm going to try the [[https://github.com/s-kostyaev/ellama][ellama]] project to
     (setopt ellama-naming-scheme 'ellama-generate-name-by-llm)
 
     )
+#+end_src
 
+* Scheme
+Let's give scheme a go, while I work my way through "The Little Schemer".
+
+I'm going to try Guile and geiser.
+
+#+begin_src emacs-lisp
+  (use-package geiser-guile
+    :ensure t)
 #+end_src
