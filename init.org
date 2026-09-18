@@ -590,7 +590,7 @@ point reaches the beginning or end of the buffer, stop there."
 
 * YASnippet - text completion
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package yasnippet
        :ensure t
        :init
