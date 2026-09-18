@@ -777,34 +777,6 @@ point reaches the beginning or end of the buffer, stop there."
     )
 #+end_src
 
-It looks like I was using org-contrib to get org babel shell support, but I don't know if I still need that. org-contrib pulls in a lot of outdated stuff, so I'm disabling this for now.
-#+begin_src emacs-lisp :tangle no
-  ;; what do I get from org-contrib?
-  (use-package org-contrib
-    :after org)
-
-    ;; ;; (require 'ob-dot) ;; have to do this for some reason, otherwise babel can't handle dot.
-    ;; would be good to be able to do it via use-package
-
-  (use-package ob-shell
-    :ensure org-contrib
-    :commands
-    org-babel-execute:sh
-    org-babel-expand-body:sh
-    org-babel-execute:bash
-    org-babel-expand-body:bash
-    :custom
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     (append org-babel-load-languages
-             '(
-               (sh . t)
-               (bash . t)
-               )))
-    )
-#+end_src
-
-
 Let's make org-mode have dyanmic wrapping, and center it in the frame so that it works a bit more like a typical word processor.
 
 For this, I make use of [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]] , then text behaves as if you'd used M-q but without actually adding line breaks to the source text.
