@@ -797,7 +797,6 @@ To make org mode look a bit nicer, I like to use the org-bullets package to repl
     :hook (org-mode . org-bullets-mode))
 #+end_src
 
-
 ** Toc-org
 :PROPERTIES:
 :ID:       645D194F-01A8-4A97-97C0-FAF5403AC805
@@ -876,9 +875,6 @@ I've also created a template for notes - it uses a function to create a new note
                 )))
        )
    #+end_src
-
-   #+RESULTS:
-   : org-capture
 
    I start by defining C-c c as the keybinding to trigger capture. This is set globally so I can capture a note from anywhere in emacs.
 
