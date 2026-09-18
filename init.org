@@ -870,50 +870,55 @@ I've also created a template for notes - it uses a function to create a new note
       '&body='+encodeURIComponent(window.getSelection());
    #+end_src
 ** org-ql
+:PROPERTIES:
+:ID:       0FA9F9A3-D381-4C8C-AB93-E2FBA1313BB2
+:END:
 I'm going to try using org-ql and dynamic blocks to provide backlinks in my org notes. This is the approach I describe in my note taking notes (searching_notes.org)
 
 I can insert a dynamic block with C-c C-x x and select "backlinks" from the list. This will add the block and update it, so any links to the current org section will be listed.
 
-
 #+begin_src emacs-lisp
 
-    (use-package org-ql
-      :after org
-      :bind ("C-c s" . gp/org-ql-search)
-      :init
-      (defun org-dblock-write:zorg-backlinks (&rest params)
-        (let ((elements (org-ql-query
-                         :from org-agenda-text-search-extra-files
-                         :where `(link :target ,(org-id-store-link)))))
-          (insert "Backlinks:\n")
-          (dolist (element elements)
-            (insert "- " (org-make-link-string (concat "id:" (org-element-property :ID element))
-                                               (org-element-property :raw-value element))
-                    "\n"))
-          (delete-char -1)))
+  (use-package org-ql
+    :after org
+    :bind ("C-c s" . gp/org-ql-search)
+    :init
+    (defun org-dblock-write:zorg-backlinks (&rest params)
+      (let ((elements (org-ql-query
+                       :from org-agenda-text-search-extra-files
+                       :where `(link :target ,(org-id-store-link)))))
+        (insert "Backlinks:\n")
+        (dolist (element elements)
+          (insert "- " (org-make-link-string (concat "id:" (org-element-property :ID element))
+                                             (org-element-property :raw-value element))
+                  "\n"))
+        (delete-char -1)))
 
-      ;; Enable inserting the dynamic block with C-x C-x x
-      (defun org-insert-dblock:backlinks ()
-        "Insert a dynamic block backlinks at point."
-        (interactive)
-        (atomic-change-group
-          (org-create-dblock (list :name "zorg-backlinks")))
-        (org-update-dblock))
+    ;; Enable inserting the dynamic block with C-x C-x x
+    (defun org-insert-dblock:backlinks ()
+      "Insert a dynamic block backlinks at point."
+      (interactive)
+      (atomic-change-group
+        (org-create-dblock (list :name "zorg-backlinks")))
+      (org-update-dblock))
 
-      (org-dynamic-block-define "backlinks" #'org-insert-dblock:backlinks)
-      ;; update dynamic blocks when saving
-      ;; to ensure backlinks are always up to date.
-      (add-hook 'before-save-hook #'org-update-all-dblocks)
+    (org-dynamic-block-define "backlinks" #'org-insert-dblock:backlinks)
+    ;; update dynamic blocks when saving
+    ;; to ensure backlinks are always up to date.
+    (add-hook 'before-save-hook #'org-update-all-dblocks)
 
-      :config
-      ;; search my notes with org-ql
-      (defun gp/org-ql-search (query narrow)
-        "Search `org-agenda-text-search-extra-files' with `org-ql-search'."
-        (interactive (read-string "Query: " ))
-        (org-ql-search org-agenda-text-search-extra-files (query) :sort '(date) :super-groups nil :narrow narrow))
-      )
+    :config
+    ;; search my notes with org-ql
+    (defun gp/org-ql-search (query)
+      "Search `org-agenda-text-search-extra-files' with `org-ql-search'."
+      (interactive (list (read-string "Query: " )))
+      (org-ql-search org-agenda-text-search-extra-files query :sort '(date) :super-groups nil :narrow narrow))
+    )
 #+end_src
 ** org-present
+:PROPERTIES:
+:ID:       4EB74E01-7A79-4A77-B486-3AA5BFBE02ED
+:END:
 
 For giving presentations with org mode. This is all taken from the System Crafters guide: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
 
