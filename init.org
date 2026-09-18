@@ -830,11 +830,21 @@ I've also created a template for notes - it uses a function to create a new note
     ;; open agenda in current window
     (org-agenda-window-setup (quote current-window))
     ;; file to save todo items
-    (org-agenda-files (quote ("~/Documents/syncthing/org/todo.org")))
+    ;(org-agenda-files (quote ("~/Documents/syncthing/org/todo.org")))
+    (org-agenda-files '("~/Documents/syncthing/org"))
     (add-to-list 'org-agenda-text-search-extra-files '(org-agenda-files :maxlevel . 2))
+    (org-agenda-custom-commands
+     '(("n" . "Search in notes")
+       ("nt" "Note tags search" tags ""
+        ((org-agenda-files (gp/list-note-files))))
+       ("ns" "Note full test search" search ""
+        ((org-agenda-files (gp/list-note-files))))))
     )
 #+end_src
 ** Org Protocol
+:PROPERTIES:
+:ID:       5B9A4096-C3CC-4A1A-B156-365171CAD243
+:END:
    Org capture works well within emacs but if you want to make a note based on something in another application [[https://orgmode.org/manual/Protocols.html#Protocols][org-protocol]] can help.
 
    Firstly, we need to have the emacs server running, so emacsclient can talk to it.
