@@ -790,19 +790,6 @@ For this, I make use of [[https://github.com/joostkremers/visual-fill-column][vi
     (visual-fill-column-center-text t))
 #+end_src
 
-Previously I used  [[https://github.com/rnkn/olivetti][olivetti mode]] instead, but this should be a lighter weight approach.
-
-#+begin_src emacs-lisp :tangle no
-  (use-package olivetti
-    :diminish
-    :init
-    (setq-default fill-column 120)
-    :config
-    (olivetti-set-width 100) ;; olivetti mode seems to go wider then 100, so I set the fill column to 120 to visually match.
-    (setq olivetti-style "fancy")
-    :hook (org-mode . olivetti-mode))
-#+end_src
-
 To make org mode look a bit nicer, I like to use the org-bullets package to replace headline markers with Unicode bullets.
 #+begin_src emacs-lisp
   (use-package org-bullets
