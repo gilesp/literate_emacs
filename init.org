@@ -1210,14 +1210,17 @@ Turn on ivy integration for lsp:
 #+end_src
 
 ** Treemacs
+:PROPERTIES:
+:ID:       10C03793-2F9A-459E-A271-83814F642CE3
+:END:
 
    Sometimes I want an IDE style tree view, so lets enable treemacs and lsp-treemacs
+   This doesn't work with eglot, so it's disabled for now.
 #+begin_src emacs-lisp :tangle no
   (use-package lsp-treemacs
-    :config
+    :custom
     (lsp-treemacs-sync-mode 1)
-    :commands lsp-treemacs-errors-list
-    :after (treemacs lsp-mode))
+    :after (eglot))
 #+end_src
 
 Treemacs provides a very configurable tree-view. I'm going to see how I get on with it, so I've just grabbed a basic config from the [[https://github.com/Alexander-Miller/treemacs][treemacs documentation]].
