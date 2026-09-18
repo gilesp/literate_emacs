@@ -1637,21 +1637,6 @@ And set up some sql-mode connections
                             (sql-user "productinfo")
                             (sql-password "productinfo")
                             (sql-database "orcl"))))
-        '((primary-db (sql-product 'postgres)
-                      (sql-database (concat "postgresql://"
-                                            "username"  ;; replace with your username
-                                            ":" (read-passwd "Enter password: ")
-                                            "@host"      ;; replace with your host
-                                            ":port"      ;; replace with your port
-                                            "/database"  ;; replace with your database
-                                            )))
-          (secondary-db (sql-product 'postgres)
-                        (sql-database (concat "postgresql://"
-                                              "username:"
-                                              (read-passwd "Enter password: ")
-                                              "@host"
-                                              ":port"
-                                              "/database")))))
 #+end_src
 
 * LLM assistant
