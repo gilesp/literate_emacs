@@ -78,6 +78,7 @@
   - [[#java][Java]]
     - [[#lsp-mode-deprecated][lsp-mode (Deprecated)]]
     - [[#eglot][eglot]]
+    - [[#tree-sitter][tree-sitter]]
     - [[#cucumber-tests][Cucumber tests]]
   - [[#rust][Rust]]
 - [[#yaml][Yaml]]
@@ -86,6 +87,11 @@
 - [[#remote-access-with-tramp][Remote access with Tramp]]
 - [[#structurizr-mode][Structurizr Mode]]
 - [[#sql-mode-disabled][SQL Mode (Disabled)]]
+- [[#llm-assistant][LLM assistant]]
+  - [[#local-llms-disabled][Local LLMs [Disabled]]]
+  - [[#gptel-disabled][GPTEL [Disabled]]]
+  - [[#editor-code-assistant][Editor Code Assistant]]
+  - [[#mcp-usage-disabled][MCP usage [Disabled]]]
 - [[#scheme][Scheme]]
 
 * About this file
@@ -116,12 +122,18 @@ This is a literate configuration, meaning that it's an org file with embedded co
   Any code in this section should not depend on a particular package or the emacs frame being in any given state. It's meant for doing initial basic configuration before the frame is created.
 
 ** Which platform is this?
+:PROPERTIES:
+:ID:       0D0A773D-A583-47FF-BFB9-EF57158C5B52
+:END:
   This would be a good place to set any device or location specific flags. For example, if I need different config at home compared to work, then I could detect the location/machine here and set an appropriate variable to be used in the rest of the config.
 #+begin_src emacs-listp :tangle early-init.el
   (defconst gp/env-macos (eq system-type 'darwin))
 #+end_src
 
 ** Basic frame (window) configuration
+:PROPERTIES:
+:ID:       7F5A5E55-6114-4870-8641-9CB3581F910B
+:END:
 By doing basic frame config here, then it will apply to the initial frame and all subsequent frames.
 
 Allow setting frame size by pixels, and also prevent emacs from resizing the frame when we change font sizes.
@@ -215,6 +227,9 @@ An emacs Frame is what most would call a window; Emacs predates commonly accepte
 #+end_src
 
 ** Ensure frame gets focus
+:PROPERTIES:
+:ID:       2A399876-545C-4C6E-BEDE-7AF7384169EF
+:END:
 On MacOS, the initial emacs frame doesn't get focus automatically, meaning it appears behind the terminal window I've just launched it from. This should sort that.
 
 #+begin_src emacs-lisp
@@ -224,6 +239,9 @@ On MacOS, the initial emacs frame doesn't get focus automatically, meaning it ap
 
 
 ** Use-Package
+:PROPERTIES:
+:ID:       006729B7-D364-4839-9530-DA5CACCE4FD2
+:END:
    I like to use [[https://github.com/jwiegley/use-package][use-package]] to keep things tidy and speedy on startup, so this makes sure it's available. I set it to defer loading packages unless told otherwise, this speeds up initialisation.
 
  #+begin_src emacs-lisp
@@ -258,12 +276,18 @@ On MacOS, the initial emacs frame doesn't get focus automatically, meaning it ap
        (auto-package-update-maybe))
  #+end_src
 ** Diminish
+:PROPERTIES:
+:ID:       95B1E0FD-5FA3-4AE5-9C46-583367863634
+:END:
 Use diminish so that use-package can hide modes from the mode line when we ask it to.
 #+begin_src emacs-lisp
 (use-package diminish)
 #+end_src
 
 ** TODO: Garbage Collection (again)
+:PROPERTIES:
+:ID:       91664649-6977-41AB-A14B-603EAE8D67F9
+:END:
    Increase the garbage collection thresholds when using the minibuffer, and return to normal afterwards.
 
  #+begin_src emacs-lisp
@@ -281,6 +305,9 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
    ;; (add-hook 'minibuffer-exit-hook #'gp/restore-garbage-collection-h)
  #+end_src
 ** Personal Information
+:PROPERTIES:
+:ID:       E1B3BA7A-05F4-4584-AD69-CC654D962FCA
+:END:
     This is me
  #+begin_src emacs-lisp
  (setq user-full-name "Giles Paterson"
@@ -288,27 +315,38 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
  #+end_src
 
 ** Fix defaults
+:PROPERTIES:
+:ID:       BCE8E65B-BF24-48DC-BAFE-2F8C2C7BB509
+:END:
  Reset some emacs defaults that date from prehistoric times
 
  #+begin_src emacs-lisp
    (setq sentence-end-double-space nil) ;; Who the hell does this in 2021?
-   (setq mark-even-if-inactive nil)     ;; Fix undo in command affecting the mark.
    (setq kill-whole-line t)             ;; Let C-k delete the whole line.
    (setq native-comp-async-report-warnings-errors nil) ;; don't show native complilation warnings
  #+end_src
 
 ** Automatically Revert Buffers
+:PROPERTIES:
+:ID:       6A392A9B-30D0-439A-B155-C20634A22E85
+:END:
    If a file changes on disk, I want the buffer to update. Emacs will prompt if I have unsaved changes, so this is safe to do.
    #+begin_src emacs-lisp
      (global-auto-revert-mode 1)
    #+end_src
 ** Tabs
+:PROPERTIES:
+:ID:       08D364F8-123A-4BB1-9913-C105C28EEC63
+:END:
     Tabs, spaces. It's a whole thing. Fundamentally, I'd love for tabs to work like tabs, and allow users to set their own tab spacing, but that's not the world we live in anymore. So, I need to use spaces.
     #+begin_src emacs-lisp
       (setq-default indent-tabs-mode nil)
       (setq tab-width 4)
     #+end_src
 ** Disable use of the customize file
+:PROPERTIES:
+:ID:       F07D6EEA-5A89-4D57-A12F-B8B2F605B07A
+:END:
     I find this annoying, as it's all too easy to override something by accident with the customize functionality, then your emacs init doesn't work. You can't get rid of it completely, but you can point it at another file, to avoid cluttering up init.el
 
 #+begin_src emacs-lisp
@@ -319,6 +357,9 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
 #+end_src
 
 ** Disable backup files
+:PROPERTIES:
+:ID:       4F01692E-6213-4FB3-A196-E4C31A2EC97B
+:END:
     I've never found emacs backup files to be particularly useful
 #+begin_src emacs-lisp
   (setq make-backup-files nil)
@@ -327,6 +368,9 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
 #+end_src
 
 ** UTF-8 all the things!
+:PROPERTIES:
+:ID:       1169D0C8-8481-407E-AED1-A19A4CD86E59
+:END:
     utf-8 should be the default for everything.
 
 #+begin_src emacs-lisp
@@ -340,12 +384,18 @@ Use diminish so that use-package can hide modes from the mode line when we ask i
 #+end_src
 
 ** Unbind the pesky sleep key
+:PROPERTIES:
+:ID:       1D92A60E-E6A8-4D57-8CD2-594E6FD5EF84
+:END:
 #+begin_src emacs-lisp
   (global-unset-key [(control z)])
   (global-unset-key [(control x)(control z)])
 #+end_src
 
 ** Switch between windows easily
+:PROPERTIES:
+:ID:       CCC9609B-E261-4AF5-8139-26F3FD13E52D
+:END:
 switch-window enables selecting windows by number (or letter). You can jump directly to a window rather than cycling through them or navigating up/down/left/right with windmove-*
 
 #+begin_src emacs-lisp
@@ -360,11 +410,17 @@ switch-window enables selecting windows by number (or letter). You can jump dire
 When there are more than two windows present, it will overlay the window with a number so you can jump directly to it. A similar process is enabled when splitting.
 
 ** Use 'y' or 'n' instead of 'yes' or 'no'
+:PROPERTIES:
+:ID:       A11F5330-9553-429C-ACAB-2BD88964C449
+:END:
 #+begin_src emacs-lisp
   (fset 'yes-or-no-p 'y-or-n-p)
 #+end_src
 
 ** Fix MacOS Path nonsense
+:PROPERTIES:
+:ID:       34A1F6CD-CD08-4ACF-8ADE-EF01EBA6ADAF
+:END:
    on OS X, where an Emacs instance launched as a GUI app inherits a default minimal set of environment variables that
    are probably not the ones you see in a terminal window. Similarly, if you start Emacs as a daemon from systemd or
    launchd, it will run with a default set of environment variables.
@@ -381,6 +437,9 @@ This library solves this problem by copying important environment variables from
 #+end_src
 
 ** A function to set the framesize for streaming
+:PROPERTIES:
+:ID:       A2272849-527C-4D8B-809E-67C61FAE9726
+:END:
  Sometimes I want to show emacs via OBS Studio, which I have set to 1280x720p. A frame size of 109x31 fits perfectly for me. Here's a function I can call to switch to toggle between that frame size and my normal one, when I need it.
  #+begin_src emacs-lisp
    (defvar gp/frame-normal-width 110)
@@ -424,6 +483,9 @@ This library solves this problem by copying important environment variables from
  #+end_src
 
 ** Enable recentf mode ([[https://www.emacswiki.org/emacs/RecentFiles][recent-files]])
+:PROPERTIES:
+:ID:       B48710C7-03D4-4F42-8D7A-BE8F115471EB
+:END:
 Recentf is useful to re-open a file you worked on recently, but it's good to set some limits on it. Also, ignore any package files from elpa, as they make it less than useful.
 #+begin_src emacs-lisp
   (require 'recentf)
@@ -437,6 +499,9 @@ Recentf is useful to re-open a file you worked on recently, but it's good to set
 I've replaced the recentf-open-files keybinding with counsel-recentf instead.
 
 ** Enable overwriting selected text
+:PROPERTIES:
+:ID:       E4FC48D6-8A3A-49BA-B76A-36ABF3B4672C
+:END:
 #+begin_src emacs-lisp
   ;; Delete the selected text upon text insertion
   (use-package delsel
@@ -446,6 +511,9 @@ I've replaced the recentf-open-files keybinding with counsel-recentf instead.
 
 
 ** Show trailing white space
+:PROPERTIES:
+:ID:       1339F932-CB64-4CC3-B1F2-A38F14B933A7
+:END:
    Show white space at the ends of line, to avoid embarassment when comitting something. Then delete them with M-x delete-trailing-whitespace
   #+begin_src emacs-lisp
     (setq-default show-trailing-whitespace t)
@@ -468,6 +536,9 @@ I've replaced the recentf-open-files keybinding with counsel-recentf instead.
   #+end_src
 
 ** Highlight current line
+:PROPERTIES:
+:ID:       6DB8BDB6-EFB7-4979-A018-E97E7636E766
+:END:
 This is useful in many situations, so enable it for programming and
 text editing based modes.
 #+begin_src emacs-lisp
@@ -477,6 +548,9 @@ text editing based modes.
 #+end_src
 
 ** Undo Tree
+:PROPERTIES:
+:ID:       058ED1B6-8F38-4973-B037-19BFD6727D01
+:END:
 Emacs has a powerful, but confusing, undo model. Undo tree makes it easier to use and lets you get back pretty much anything you've done.
 #+begin_src emacs-lisp
 (use-package undo-tree
@@ -488,6 +562,9 @@ Emacs has a powerful, but confusing, undo model. Undo tree makes it easier to us
 #+end_src
 
 ** Theme
+:PROPERTIES:
+:ID:       9C106513-D6EB-4CA1-AA52-4428928DEB32
+:END:
 I like a dark editor, and base16-brewer is what I've got used previously. But now I'm trying modus-vivendi. Previously I used vscode-dark-plus but that doesn't work in emacs 30.
 #+begin_src emacs-lisp
   (load-theme 'modus-vivendi t)
@@ -505,6 +582,9 @@ I like a dark editor, and base16-brewer is what I've got used previously. But no
 #+end_src
 
 *** Mode line
+:PROPERTIES:
+:ID:       441F3154-A8F7-44CF-B45E-8541749BAC98
+:END:
     I'm using doom-modeline as it looks nice and is pretty customisable. +It depends on =all-the-icons= so you need to run =M-x all-the-icons-install-fonts= to make sure the fonts are installed.+
 
     Now it seems to depend on ~nerd-icons~ so you need to run ~M-x nerd-icons-install-fonts~ instead.
@@ -518,6 +598,9 @@ I like a dark editor, and base16-brewer is what I've got used previously. But no
 #+end_src
 
 ** Fonts
+:PROPERTIES:
+:ID:       A5078723-93E9-4922-810C-0735F0F56D47
+:END:
 A matter of personal opinion, but a modern mono-spaced font makes emacs look a lot better.
 
 I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pitch (i.e. monospace)
@@ -543,6 +626,9 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
 #+end_src
 
 ** Which key
+:PROPERTIES:
+:ID:       A551587C-D53A-4827-A596-126AA15B5322
+:END:
    [[https://github.com/justbur/emacs-which-key][Which-key]] enables discoverability of available commands.
 
    If you ever want to just explore the available keybindings, then try =M-x which-key-show-top-level= or =M-x which-key-show-major-mode=
@@ -557,6 +643,9 @@ I'm setting Roboto Light for the variable pitch font and Fira Code for fixed-pit
 #+end_src
 
 ** Smart move to beginning of line
+:PROPERTIES:
+:ID:       BAEC7CD6-6E1A-400A-A2A6-7DDD8C089857
+:END:
 This function was originally taken from the [[https://emacsredux.com/blog/2013/05/22/smarter-navigation-to-the-beginning-of-a-line/][Emacs Redux]] blog. It means that pressing C-a will move the cursor to the start of the text on a line. Pressing it again will jump to the physical start of the line.
 
 #+begin_src emacs-lisp
@@ -751,6 +840,9 @@ To make org mode look a bit nicer, I like to use the org-bullets package to repl
 
 
 ** Toc-org
+:PROPERTIES:
+:ID:       645D194F-01A8-4A97-97C0-FAF5403AC805
+:END:
  Install the =toc-org= package after org mode is loaded. This enables automatic generation of up to
  date tables of contents.
 
@@ -815,9 +907,19 @@ I've also created a template for notes - it uses a function to create a new note
                 entry  ; type
                 (file (lambda () (gp/capture-note-file "~/Documents/syncthing/org/notes"))) ; target
                 "* %? %(org-set-tags-command) \n%U" ; template
+                )
+               ("m"    ; key
+                "Meeting" ; description
+                entry  ; type
+                (file (lambda () (gp/capture-note-file "~/Documents/syncthing/org/notes/meetings"))) ; target
+                "* %? :meeting: \n%U" ; template
+                :empty-lines 1
                 )))
        )
    #+end_src
+
+   #+RESULTS:
+   : org-capture
 
    I start by defining C-c c as the keybinding to trigger capture. This is set globally so I can capture a note from anywhere in emacs.
 
@@ -982,6 +1084,9 @@ For giving presentations with org mode. This is all taken from the System Crafte
 #+end_src
 ** Org Exporters
 *** Markdown (Github Flavoured)
+:PROPERTIES:
+:ID:       051A0301-7836-4556-95EB-F716269BBFF0
+:END:
 
 #+begin_src emacs-lisp
   (use-package ox-gfm
@@ -989,6 +1094,9 @@ For giving presentations with org mode. This is all taken from the System Crafte
     :after org)
 #+end_src
 *** Typst
+:PROPERTIES:
+:ID:       6F0503B7-0384-4FC4-ADB4-299AA3BA4BCA
+:END:
 
 #+begin_src emacs-lisp
   (use-package ox-typst
@@ -996,6 +1104,9 @@ For giving presentations with org mode. This is all taken from the System Crafte
     :after org)
 #+end_src
 * Markdown
+:PROPERTIES:
+:ID:       DC424A68-5BB4-4BEC-8E6E-9EAD1BEC3A63
+:END:
 Sometimes I need to edit markdown, so here's how to configure [[https://github.com/jrblevin/markdown-mode][markdown-mode]].
 For README.md files, use github flavoured markdown, otherwise use normal markdown mode.
 
@@ -1009,6 +1120,9 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
 * Completion Framework
 
 ** Ivy
+:PROPERTIES:
+:ID:       1783D2BA-EA97-4341-BBE4-23A583E92542
+:END:
    I'm going to give Ivy a go (along with Swiper/Counsel) to see if I like it, instead of Helm.
 
  #+begin_src emacs-lisp
@@ -1026,6 +1140,9 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
   I'll start with a minimal config - just setting the options recommended in the getting started section of the documentation.
 
 ** Counsel
+:PROPERTIES:
+:ID:       02D73BB3-8E7A-4E39-9C85-B8424401AEA7
+:END:
    Similarly, for Counsel, I'll just enable counsel-mode to default to using counsel.
 #+begin_src emacs-lisp
   (use-package counsel
@@ -1038,6 +1155,9 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
 #+end_src
 
 ** Ivy-Rich
+:PROPERTIES:
+:ID:       B416C756-DC98-428A-BBCE-092A9D74C48F
+:END:
    Ivy-rich enables prettifying the ivy output
 #+begin_src emacs-lisp
   (use-package ivy-rich
@@ -1051,6 +1171,9 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
 #+end_src
 
 ** Swiper
+:PROPERTIES:
+:ID:       10CF374E-3325-40B2-84E1-1F5939D14B1F
+:END:
    And finally, swiper for searching. I bind it to C-s so that I use it instead of i-search.
 
    I'm now binding swiper-thing-at-point to C-s since I'm usually searching for th thing I'm looking at.
@@ -1061,6 +1184,9 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
 #+end_src
 
 * Git stuff
+:PROPERTIES:
+:ID:       222C779E-4D0E-4A6D-86EF-BB2473091EDA
+:END:
 Magit is a great interface to git (although the [[https://magit.vc/manual/magit/][documentation]] is quite dense).
 #+begin_src emacs-lisp
   (use-package magit
@@ -1086,6 +1212,9 @@ The update-interval config is to enable live updating (every 2 seconds of idle t
 I enable it globally because I use git for many different files, not just code.
 
 * Projectile
+:PROPERTIES:
+:ID:       62579B8F-D53C-4AD0-8B20-03728D55D5A8
+:END:
 [[https://github.com/bbatsov/projectile][Projectile]] is handy for interacting with projects, and it can integrate with Helm or Ivy nicely.
 #+begin_src emacs-lisp
   (use-package projectile
@@ -1113,6 +1242,9 @@ And since I'm currently using Ivy & Counsel, I'll include the [[https://github.c
 ** TODO [[https://github.com/ericdanan/counsel-projectile#setting-counsel-projectile-org-capture-templates][counsel-projectile-org-capture]]
 
 * Code/Text Completion (company-mode)
+:PROPERTIES:
+:ID:       F84430C0-7845-42EF-BC84-B890B6541319
+:END:
 Got to have those sweet code-completion popups, courtesy of [[https://company-mode.github.io/][company-mode]].
 #+begin_src emacs-lisp
     (use-package company
@@ -1142,6 +1274,9 @@ I've had issues with company popups being ragged when I'm using a proportional f
 #+end_src
 
 * Parentheses
+:PROPERTIES:
+:ID:       EA3A7F78-4582-44A8-B337-D26634F90745
+:END:
 I find it invaluable to have parentheses matching enabled.
 #+begin_src emacs-lisp
   (show-paren-mode t)
@@ -1154,6 +1289,9 @@ And I like the visual delimitation of colour. Rainbow-delimiters adds that.
 #+end_src
 
 * Line numbers
+:PROPERTIES:
+:ID:       C3251E38-D78C-4974-97BB-D56BF7C1FB43
+:END:
 I want line numbers on all code editing buffers. Since they should all
 derive from prog-mode, I'll set line numbers there and hope for the
 best. The alternative is to enable global line numbers then turn it
@@ -1240,6 +1378,8 @@ C-x t t should toggle the treeview, and I'll see how I get on with that.
       ;; using a Hi-DPI display, uncomment this to double the icon size.
       ;;(treemacs-resize-icons 44)
 
+      (treemacs-display-current-project-exclusively) ;; don't show other projects, just what I'm working on now.
+      (treemacs-project-follow-mode t) ;; automatically switch to the project for the current buffer
       (treemacs-tag-follow-mode t)
       (treemacs-filewatch-mode t)
       (treemacs-fringe-indicator-mode 'always)
@@ -1268,6 +1408,9 @@ Make things pretty with all-the-icons
 #+end_src
 
 ** Javascript/web development (lsp?)
+:PROPERTIES:
+:ID:       076E4BC3-4249-4D42-8189-07AE65146B45
+:END:
    There are several ways to configure javascript & typescript support. I'm going with web-mode since it can handle template-based development (react, vue etc.) along with raw js & ts files.
 
 #+begin_src emacs-lisp
@@ -1395,6 +1538,9 @@ For this to work, you need rust-analyzer installed. The easiest method is to use
 #+end_src
 
 * Yaml
+:PROPERTIES:
+:ID:       9F7C56E9-72B2-4E43-AFF4-D6932C1782BA
+:END:
 #+begin_src emacs-lisp
   (use-package yaml-mode
     :ensure t
@@ -1402,6 +1548,9 @@ For this to work, you need rust-analyzer installed. The easiest method is to use
 #+end_src
 
 * Restclient
+:PROPERTIES:
+:ID:       8EDC12C4-1DBB-45CA-AAB4-9CEADE95D7EA
+:END:
 [[https://github.com/pashky/restclient.el][A tool for interacting with webservices.]]
 [[https://erick.navarro.io/blog/testing-an-api-with-emacs-and-restclient/][This]] is a good intro to using restclient.
 Bind it to .http files.
@@ -1428,6 +1577,9 @@ And, of course, we can integrate it with org mode:
 #+end_src
 
 * uLisp
+:PROPERTIES:
+:ID:       7E0C6607-B068-4741-ABC8-24B1B8351735
+:END:
 
 
 
@@ -1446,6 +1598,9 @@ And, of course, we can integrate it with org mode:
   #+end_src
 
 * Remote access with Tramp
+:PROPERTIES:
+:ID:       2EC4CD3E-8FBE-4CB9-BC3C-9228541452B8
+:END:
   Tramp is an emacs feature that lets you edit a file on a remote machine via ssh and other methods. I only really want ssh, so I'll set that as the default
 
 #+begin_src emacs-lisp
@@ -1453,6 +1608,9 @@ And, of course, we can integrate it with org mode:
 #+end_src
 
 * Structurizr Mode
+:PROPERTIES:
+:ID:       DF45EDFE-E229-440D-8798-9C77685B7ADD
+:END:
 This is my custom structurizr mode (available on github at https://github.com/gilesp/structurizr-mode).
 
 #+begin_src emacs-lisp
