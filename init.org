@@ -1324,11 +1324,16 @@ Alternatively, this could be installed as a docker container, and then you could
    #+end_src
 
 *** eglot
+:PROPERTIES:
+:ID:       E0EF0257-1A62-4B0B-BD11-C7E0899FD5D6
+:END:
 
 Setup eglot-java
 #+begin_src emacs-lisp
   (use-package eglot-java
-    :hook (java-mode . eglot-java-mode)
+    :hook (
+           (java-ts-mode . eglot-java-mode)
+           (java-mode . eglot-java-mode))
     :bind (:map eglot-java-mode-map
                 ("C-c <tab>" . company-complete)
                 ("C-c l n" . eglot-java-file-new)
@@ -1337,6 +1342,9 @@ Setup eglot-java
                 ("C-c l N" . eglot-java-project-new)
                 ("C-c l T" . eglot-java-project-build-task)
                 ("C-C l R" . eglot-java-project-build-refresh))
+    ;;:custom
+    ;;(eglot-java-java-home '("/Users/giles.paterson/.jenv/versions/21"))
+    ;;(eglot-java-java-program '("/Users/giles.paterson/.jenv/versions/21/bin/java"))
     )
   #+end_src
     When doing maven builds etc, it's nice to have the compilation buffer autoscroll:
@@ -1344,12 +1352,30 @@ Setup eglot-java
     (setq compilation-scroll-output t)
    #+end_src
 
+*** tree-sitter
+#+begin_src elisp :tangle no
+   (use-package tree-sitter
+     :ensure t
+     :config
+     (global-tree-sitter-mode)
+     (require 'tree-sitter-langs))
+
+   (use-package tree-sitter-langs
+     :ensure t)
+   #+end_src
+
 *** Cucumber tests
+:PROPERTIES:
+:ID:       04F81AC6-4A47-4E99-8E16-D6CAC6CD3AE0
+:END:
 #+begin_src emacs-lisp
   (use-package feature-mode
     :mode (("\\.feature\\'" . feature-mode)))
 #+end_src
 ** Rust
+:PROPERTIES:
+:ID:       9654D859-5BB6-4591-9BDB-D55264B28A7B
+:END:
 Setup rust-mode and lsp for Rust programming
 
 For this to work, you need rust-analyzer installed. The easiest method is to use rustup:
