@@ -1497,13 +1497,14 @@ And set up some sql-mode connections
                                               "/database")))))
 #+end_src
 
- LLM assistant
+* LLM assistant
 
+** Local LLMs [Disabled]
 I've started using ollama at work to run a number of code oriented LLMs on a beefy AI server. It'd be good to access these from within Emacs as well as via IntelliJ and the web as we currently do.
 
-I'm going to try the [[https://github.com/s-kostyaev/ellama][ellama]] project to interract with our ollama instances.
++I'm going to try the [[https://github.com/s-kostyaev/ellama][ellama]] project to interract with our ollama instances.+
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package ellama
     :bind ("C-c e" . ellama-transient-main-menu)
     :init
@@ -1534,7 +1535,81 @@ I'm going to try the [[https://github.com/s-kostyaev/ellama][ellama]] project to
     )
 #+end_src
 
+** GPTEL [Disabled]
+
+Pausing my use of gptelk to experiment with Editor Code Assistant
+
++I'm going to try [[https://github.com/karthink/gptel][gptel]] now, since we've switched to the cloud versions of claude, chatgpt and claude instead of our local llms.+
+
+#+begin_src emacs-lisp :tangle no
+  (use-package gptel
+    :bind (("C-c g" . gptel-send))
+    :init
+    (gptel-make-gemini "Gemini"
+      :key (gptel-api-key-from-auth-source "generativelanguage.googleapis.com")
+      :request-params '(:tools [(:google_search ())]
+                               :generationConfig (:thinkingConfig (:includeThoughts "false")))
+      :stream t)
+    :config
+    (require 'gptel-integrations))
+#+end_src
+
+gptel will read keys from [[https://github.com/karthink/gptel?tab=readme-ov-file#optional-securing-api-keys-with-authinfo][~/.authinfo]], so I'll set my keys there.
+ChatGPT is configured by default, but you need to enable other backends individually.
+
+** Editor Code Assistant
+:PROPERTIES:
+:ID:       46F92344-22DA-4C49-916D-7DCCCC0C6A5A
+:END:
+
+#+begin_src emacs-lisp
+;; An interrupted :vc clone leaves an empty elpa/eca dir behind, which makes
+;; package-vc-install prompt "Overwrite previous checkout?" on every startup
+;; and block init until answered. Clear it out first so that can't happen.
+(let ((eca-dir (expand-file-name "elpa/eca" user-emacs-directory)))
+  (when (and (file-directory-p eca-dir)
+             (null (directory-files eca-dir nil directory-files-no-dot-files-regexp)))
+    (delete-directory eca-dir)))
+
+(use-package eca
+  :vc (:url "https://github.com/editor-code-assistant/eca-emacs" :rev :newest))
+#+end_src
+
+** MCP usage [Disabled]
+I've not made much use of the mcp servers, and found that they were just sitting idle most of the time.
++Lets configure some Model Context Protocol servers to augment gptel+
+
+#+begin_src emacs-lisp :tangle no
+    (use-package mcp
+    :ensure t
+    :after gptel
+    :custom (mcp-hub-servers
+             `(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/Users/giles.paterson/")))
+               ("jira" . (:command "docker"
+                          :args ("run" "-i" "--rm"
+                                 "-e" "CONFLUENCE_URL"
+                                 "-e" "CONFLUENCE_USERNAME"
+                                 "-e" "CONFLUENCE_API_TOKEN"
+                                 "-e" "JIRA_URL"
+                                 "-e" "JIRA_USERNAME"
+                                 "-e" "JIRA_API_TOKEN"
+                                 "ghcr.io/sooperset/mcp-atlassian")
+                          :env (:CONFLUENCE_URL "https://fruugo-com.atlassian.net/wiki"
+                                :CONFLUENCE_USERNAME "giles.paterson@fruugo.com"
+                                :CONFLUENCE_API_TOKEN "***REMOVED-REVOKED-TOKEN***"
+                                :JIRA_URL "https://fruugo-com.atlassian.net/"
+                                :JIRA_USERNAME "giles.paterson@fruugo.com"
+                                :JIRA_API_TOKEN "***REMOVED-REVOKED-TOKEN***")))
+               ("fruugo" . (:url "http://localhost:8080/sse" )))
+  )
+    :config (require 'mcp-hub)
+    :hook (after-init . mcp-hub-start-all-server))
+#+end_src
+
 * Scheme
+:PROPERTIES:
+:ID:       6085AFD0-ADBB-4790-8707-765A8A11E472
+:END:
 Let's give scheme a go, while I work my way through "The Little Schemer".
 
 I'm going to try Guile and geiser.
@@ -1543,3 +1618,5 @@ I'm going to try Guile and geiser.
   (use-package geiser-guile
     :ensure t)
 #+end_src
+
+#+RESULTS:
