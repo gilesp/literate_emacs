@@ -139,21 +139,30 @@ Allow setting frame size by pixels, and also prevent emacs from resizing the fra
 #+end_src
 
 ** Disable the tool-bar and menu-bar
+:PROPERTIES:
+:ID:       D154C28B-EF1E-4256-A21D-76F5E1E03D82
+:END:
  #+begin_src emacs-lisp :tangle early-init.el
    (tool-bar-mode -1)
    (menu-bar-mode -1)
  #+end_src
 
 ** Set the frame size
+:PROPERTIES:
+:ID:       764CF0CF-BD76-48B4-9D25-7BC7E4F10396
+:END:
 An emacs Frame is what most would call a window; Emacs predates commonly accepted GUI terms.
 
 #+begin_src emacs-lisp :tangle early-init.el
-  (dolist (variable '(initial-frame-alist default-frame-alit))
-    (set variable `((width . (text-pixels . 800))
-                    (height . (text-pixels . 900)))))
+  (dolist (variable '(initial-frame-alist default-frame-alist))
+    (set variable `((width . (text-pixels . 1000))
+                    (height . (text-pixels . 700)))))
 #+end_src
 
 ** Package configuration
+:PROPERTIES:
+:ID:       7580879F-A933-4B89-8C98-5CA398307E74
+:END:
   #+begin_src emacs-lisp :tangle early-init.el
     ;;; early-init.el -*- lexical-binding: t; eval: (view-mode -1); -*-
     (require 'package)
@@ -162,9 +171,13 @@ An emacs Frame is what most would call a window; Emacs predates commonly accepte
     (add-to-list 'package-archives '("gnu" . "https://elpa.gnu.org/packages/") t)
 
     (setq package-enable-at-startup t) ;; enable package cache to initialise installed packages
+    (setq package-install-upgrade-built-in t) ;; enable upgrading of built in packages
   #+end_src
 
 ** Tweak startup time and garbage collection
+:PROPERTIES:
+:ID:       CDA6A6BB-CC8D-4FEC-8072-6FF447298392
+:END:
   Taking inspiration from [[https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-does-doom-start-up-so-quickly][doom-emacs]], I'm going to bump the garbage collection threshold up during startup to help speed things up. Then we reset it after startup.
    #+begin_src emacs-lisp :tangle early-init.el
      ;; (defvar gp/gc-cons-threshold 16777216) ;; 16mb
