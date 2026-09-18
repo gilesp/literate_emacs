@@ -1151,8 +1151,6 @@ For README.md files, use github flavoured markdown, otherwise use normal markdow
     :bind (("C-x C-r" . counsel-recentf))
     :config
     (counsel-mode 1))
-
-  (use-package counsel-projectile)
 #+end_src
 
 ** Ivy-Rich
